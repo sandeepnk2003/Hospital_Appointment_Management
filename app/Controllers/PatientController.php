@@ -272,5 +272,13 @@ public function saveReschedule($id)
     return redirect()->to(base_url('patient/appointments/history'))
                      ->with('success', 'Appointment rescheduled successfully!');
 }
+public function UpdateAppointment($id){
+
+    $appointmentModel=new AppointmentModel();
+     $appointmentModel->update($id, ['status' => 'Completed']);
+    return redirect()->back()->with('message', 'Appointment marked as completed.');
+
+
+}
 
 }

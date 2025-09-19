@@ -76,6 +76,9 @@ $routes->group('patients', ['filter' => 'auth'], function($routes) {
     $routes->get('edit/(:num)', 'PatientController::edit/$1');
     $routes->post('update/(:num)', 'PatientController::update/$1');
     $routes->get('delete/(:num)', 'PatientController::delete/$1');
+     $routes->get('appointments/reschedule/(:num)', 'PatientController::reschedule/$1');
+    $routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
+    $routes->get('appointments/update/(:num)','PatientController::UpdateAppointment/$1');
 });
 
 // ---------- APPOINTMENTS ----------

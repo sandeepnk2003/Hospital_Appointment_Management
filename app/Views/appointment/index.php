@@ -53,6 +53,7 @@
                 <th>Start</th>
                 <th>End</th>
                 <th>Status</th>
+                <th colspan="2"><center>Action</center></th>
             </tr>
         </thead>
         <tbody>
@@ -65,6 +66,33 @@
                         <td><?= date('d/m/Y H:i', strtotime($a['start_datetime'])); ?></td>
                         <td><?= date('d/m/Y H:i', strtotime($a['end_datetime'])); ?></td>
                         <td><?= esc($a['status']); ?></td>
+                        
+                <td class="text-center">
+                  <?php if ($a['status'] === 'Scheduled'): ?>
+                    <a href="<?= base_url('appointments/cancel/' . $a['id']); ?>" 
+                       class="btn btn-danger btn-sm">
+                      Cancel
+                    </a>
+                     <a href="<?= base_url('patients/appointments/reschedule/'. $a['id']); ?>" 
+                       class="btn btn-success btn-sm">
+                      Reshedule
+                    </a>
+                     <a href="<?= base_url('patients/appointments/update/'. $a['id']); ?>" 
+                       class="btn btn-success btn-sm">
+                      Completed
+                    </a>
+                  <?php elseif ($a['status'] === 'Cancelled'): ?>
+                    
+                       <span class="btn btn-sm btn-success">
+                      <i class="bi bi-arrow-repeat"></i> Cancelled
+                  </span>
+                   <?php else: ?>
+                    
+                       <span class="btn btn-sm btn-success">
+                      <i class="bi bi-arrow-repeat"></i> Completed
+                  </span>
+                  <?php endif; ?>
+                </td>
                     </tr>
                 <?php endforeach; ?>
             <?php else: ?>
