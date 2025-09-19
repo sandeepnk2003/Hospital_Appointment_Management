@@ -13,9 +13,36 @@
             <a href="<?= base_url('appointments/create'); ?>" class="btn btn-success">+ Add appointment</a>
         </div>
 </div>
+<?php $qs = $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''; ?>
+<a href="<?= base_url('appointments/export') . $qs ?>" class="btn btn-success">
+  <i class="bi bi-file-earmark-excel"></i> Export to Excel
+</a>
+
     <?php if(session()->getFlashdata('success')): ?>
         <div class="alert alert-success"><?= session()->getFlashdata('success'); ?></div>
     <?php endif; ?>
+      <!-- 🔍 Search and Filter Row -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <!-- Search Bar -->
+            <div class="input-group">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" id="searchInput" class="form-control" placeholder="Search appointments, doctors, patients...">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <!-- Date Filter -->
+            <div class="input-group">
+              <span class="input-group-text bg-white">
+                <i class="bi bi-calendar-event"></i>
+              </span>
+              <input type="date" id="dateFilter" class="form-control">
+              <button class="btn btn-primary" id="filterBtn">Filter</button>
+            </div>
+          </div>
+        </div>
 
     <table class="table table-bordered">
         <thead class="table-dark">
@@ -46,5 +73,26 @@
         </tbody>
     </table>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.getElementById('filterBtn').addEventListener('click', function() {
+    let search = document.getElementById('searchInput').value;
+    let date = document.getElementById('dateFilter').value;
+
+    // Preserve the filter param from URL if it's already set
+    let urlParams = new URLSearchParams(window.location.search);
+    let filter = urlParams.get('filter') || '';
+
+    let newUrl = "<?= base_url('appointments') ?>?search=" + encodeURIComponent(search) + "&date=" + encodeURIComponent(date);
+
+    if (filter) {
+      newUrl += "&filter=" + filter;
+    }
+
+    window.location.href = newUrl;
+  });
+</script>
+
 </body>
 </html>

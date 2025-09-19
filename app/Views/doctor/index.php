@@ -10,6 +10,8 @@
     <h2 class="mb-4">Doctors List</h2>
     <a href="<?= base_url('/dashboard'); ?>" class="btn btn-secondary mb-3">Back</a>
 
+
+
     <?php if(session()->getFlashdata('success')): ?>
         <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
     <?php endif; ?>

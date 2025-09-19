@@ -44,6 +44,9 @@
         <li class="nav-item">
           <a class="nav-link" href="<?= base_url('patient/appointments/history') ?>">My Appointments</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="<?= base_url('patient/book') ?>">Book an Appointment</a>
+        </li>
       </ul>
       <span class="navbar-text text-white me-3">
         Logged in as <strong><?= session()->get('patient_name') ?></strong>
@@ -52,6 +55,7 @@
     </div>
   </div>
 </nav>
+
 
 <!-- Main content wrapper -->
 <div class="container mt-4 content">

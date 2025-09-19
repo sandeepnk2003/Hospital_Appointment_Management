@@ -8,23 +8,65 @@ use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\userModel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class AppointmentController extends ResourceController
 {
-  public function index()
-    {
-        $appointmentModel = new AppointmentModel();
+ public function index()
+{
+    $appointmentModel = new AppointmentModel();
 
-        $data['appointments'] = $appointmentModel
-            ->select('appointments.*, patients.name as patient_name, users.username as doctor_name')
-            ->join('patients', 'patients.id = appointments.patient_id')
-            ->join('doctors', 'doctors.id = appointments.doctor_id')
-            ->join('users','users.id=doctors.userid')
-            ->orderBy('appointments.start_datetime', 'ASC')
-            ->findAll();
+    $filter = $this->request->getGet('filter');   // today/week/month
+    $search = $this->request->getGet('search');   // doctor/patient name
+    $date   = $this->request->getGet('date');     // specific date
+    $today  = date('Y-m-d');
 
-        return view('appointment/index', $data);
+    $builder = $appointmentModel
+        ->select('appointments.*, patients.name as patient_name, users.username as doctor_name')
+        ->join('patients', 'patients.id = appointments.patient_id')
+        ->join('doctors', 'doctors.id = appointments.doctor_id')
+        ->join('users', 'users.id = doctors.userid');
+
+    // ✅ Apply filter: today/week/month
+    if ($filter === 'today') {
+        $builder->where('DATE(appointments.start_datetime)', $today);
+    } elseif ($filter === 'week') {
+        $startOfWeek = date('Y-m-d', strtotime('monday this week'));
+        $endOfWeek   = date('Y-m-d', strtotime('sunday this week'));
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfWeek)
+                ->where('DATE(appointments.start_datetime) <=', $endOfWeek);
+    } elseif ($filter === 'month') {
+        $startOfMonth = date('Y-m-01');
+        $endOfMonth   = date('Y-m-t');
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfMonth)
+                ->where('DATE(appointments.start_datetime) <=', $endOfMonth);
     }
+
+    // ✅ Apply search filter (doctor name OR patient name)
+    if (!empty($search)) {
+        $builder->groupStart()
+                ->like('patients.name', $search)
+                ->orLike('users.username', $search)
+                ->groupEnd();
+    }
+
+    // ✅ Apply date filter (exact match on start_datetime)
+    if (!empty($date)) {
+        $builder->where('DATE(appointments.start_datetime)', $date);
+    }
+
+    // ✅ Get results
+    $appointments = $builder->orderBy('appointments.start_datetime', 'DESC')->findAll();
+
+    return view('appointment/index', [
+        'appointments' => $appointments,
+        'filter'       => $filter,
+        'search'       => $search,
+        'date'         => $date
+    ]);
+}
+
     public function create()
 {
     $doctorModel = new DoctorModel();
@@ -121,4 +163,91 @@ class AppointmentController extends ResourceController
 
     return redirect()->back()->with('message', 'Appointment canceled.');
 }
+
+
+
+public function export()
+{
+    $appointmentModel = new AppointmentModel();
+
+    // Get query params (same as index)
+    $filter = $this->request->getGet('filter');
+    $search = $this->request->getGet('search');
+    $date   = $this->request->getGet('date');
+    $today  = date('Y-m-d');
+
+    // Base query
+    $builder = $appointmentModel
+        ->select('appointments.id, patients.name as patient_name, users.username as doctor_name, appointments.start_datetime, appointments.end_datetime, appointments.status')
+        ->join('patients', 'patients.id = appointments.patient_id')
+        ->join('doctors', 'doctors.id = appointments.doctor_id')
+        ->join('users', 'users.id = doctors.userid');
+
+    // Apply filter: today / week / month
+    if ($filter === 'today') {
+        $builder->where('DATE(appointments.start_datetime)', $today);
+    } elseif ($filter === 'week') {
+        $startOfWeek = date('Y-m-d', strtotime('monday this week'));
+        $endOfWeek   = date('Y-m-d', strtotime('sunday this week'));
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfWeek)
+                ->where('DATE(appointments.start_datetime) <=', $endOfWeek);
+    } elseif ($filter === 'month') {
+        $startOfMonth = date('Y-m-01');
+        $endOfMonth   = date('Y-m-t');
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfMonth)
+                ->where('DATE(appointments.start_datetime) <=', $endOfMonth);
+    }
+
+    // Apply search (doctor or patient)
+    if (!empty($search)) {
+        $builder->groupStart()
+                ->like('patients.name', $search)
+                ->orLike('users.username', $search)
+                ->groupEnd();
+    }
+
+    // Apply specific date filter
+    if (!empty($date)) {
+        $builder->where('DATE(appointments.start_datetime)', $date);
+    }
+
+    // Get filtered data
+    $appointments = $builder->orderBy('appointments.start_datetime', 'DESC')->findAll();
+
+    // Build Excel
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // Headers
+    $sheet->setCellValue('A1', 'ID');
+    $sheet->setCellValue('B1', 'Patient');
+    $sheet->setCellValue('C1', 'Doctor');
+    $sheet->setCellValue('D1', 'Start Date/Time');
+    $sheet->setCellValue('E1', 'End Date/Time');
+    $sheet->setCellValue('F1', 'Status');
+
+    // Data
+    $row = 2;
+    foreach ($appointments as $a) {
+        $sheet->setCellValue('A' . $row, $a['id']);
+        $sheet->setCellValue('B' . $row, $a['patient_name']);
+        $sheet->setCellValue('C' . $row, $a['doctor_name']);
+        $sheet->setCellValue('D' . $row, $a['start_datetime']);
+        $sheet->setCellValue('E' . $row, $a['end_datetime']);
+        $sheet->setCellValue('F' . $row, $a['status']);
+        $row++;
+    }
+
+    $writer = new Xlsx($spreadsheet);
+    $filename = 'appointments_filtered_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+    // Send response
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header("Content-Disposition: attachment; filename=\"{$filename}\"");
+    header('Cache-Control: max-age=0');
+
+    $writer->save('php://output');
+    exit();
+}
+
 }

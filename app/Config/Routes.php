@@ -19,6 +19,10 @@ $routes->group('patient', function($routes) {
     $routes->match(['get', 'post'], 'login', 'AuthController::Patient_login');
     $routes->post('verify-otp', 'AuthController::Patient_verifyOtp');
     $routes->get('logout', 'AuthController::Patient_logout');
+    $routes->get('register','PatientController::create');
+    $routes->post('register','PatientController::create');
+
+
 });
 
 // ---------- DASHBOARDS ----------
@@ -32,6 +36,16 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->get('profile', 'PatientController::profile');
     $routes->post('update(:num)', 'PatientController::edit/$1');
     $routes->get('appointments/history', 'PatientController::appointmentHistory');
+    $routes->get('book','PatientController::book');
+    $routes->post('book/save','PatientController::saveBooking');
+    $routes->get('appointments/rebook/(:num)','PatientController::rebook/$1');
+    $routes->post('appointments/saveRebook','PatientController::saveRebook');
+    $routes->get('appointments/reschedule/(:num)', 'PatientController::reschedule/$1');
+$routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
+
+    
+    
+
 });
 
 // ---------- USERS (Admin Only) ----------
@@ -71,6 +85,8 @@ $routes->group('appointments', ['filter' => 'auth'], function($routes) {
     $routes->post('create', 'AppointmentController::create');
     $routes->get('complete/(:num)', 'AppointmentController::markComplete/$1');
     $routes->get('cancel/(:num)', 'AppointmentController::markCancel/$1');
+    $routes->get('export', 'AppointmentController::export');
+
 });
 
 
