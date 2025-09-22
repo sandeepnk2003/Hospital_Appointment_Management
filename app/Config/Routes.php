@@ -93,3 +93,7 @@ $routes->group('appointments', ['filter' => 'auth'], function($routes) {
 });
 
 
+$routes->get('Doctor/Api','ApiController::DoctorApi');
+$routes->get('Doctor/Api/Excel','ApiController::doctorStatsTodayExcel');
+
+
