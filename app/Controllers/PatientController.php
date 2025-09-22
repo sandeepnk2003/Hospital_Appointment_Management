@@ -116,20 +116,45 @@ return view('patient/appointments_history', $data);
     public function saveBooking()
     {
         $appointmentModel = new AppointmentModel();
+         $patientId= session()->get('patient_id');
+            $start = $this->request->getPost('date') . ' ' . $this->request->getPost('time');
 
-        $data = [
-            'patient_id'     => session()->get('patient_id'),  // logged-in patient
-            'doctor_id'      => $this->request->getPost('doctor_id'),
-            'start_datetime' => $this->request->getPost('date') . ' ' . $this->request->getPost('time'),
-            'status'         => 'Scheduled',
-        ];
+    // Convert to DateTime
+    $startDateTime = new \DateTime($start);
+    $endDateTime   = (clone $startDateTime)->modify('+15 minutes');
 
-        if ($appointmentModel->insert($data)) {
-            return redirect()->to(base_url('patient/appointments/history'))
-                             ->with('success', 'Appointment booked successfully!');
-        } else {
-            return redirect()->back()->with('error', 'Failed to book appointment.');
-        }
+    $doctorId = $this->request->getPost('doctor_id');
+    $overlap = $appointmentModel->where('doctor_id', $doctorId)
+        ->where('start_datetime <=', $endDateTime->format('Y-m-d H:i:s'))
+        ->where('end_datetime >=', $startDateTime->format('Y-m-d H:i:s'))
+        ->first();
+
+    $patientOverlap = $appointmentModel->where('patient_id', $patientId)
+    ->where('start_datetime <=', $endDateTime->format('Y-m-d H:i:s'))
+    ->where('end_datetime >=', $startDateTime->format('Y-m-d H:i:s'))
+    ->first();
+
+    if ($overlap) {
+        return redirect()->back()->withInput()->with('error', 'Doctor is already booked at this time!');
+    }
+    if ($patientOverlap) {
+    return redirect()->back()->withInput()->with('error', 'You already have an appointment at this time!');
+}
+   
+     $data = [
+        'patient_id'     => session()->get('patient_id'),
+        'doctor_id'      => $doctorId,
+        'start_datetime' => $startDateTime->format('Y-m-d H:i:s'),
+        'end_datetime'   => $endDateTime->format('Y-m-d H:i:s'),
+        'status'         => 'Scheduled',
+    ];
+
+    if ($appointmentModel->insert($data)) {
+        return redirect()->to(base_url('patient/appointments/history'))
+                         ->with('success', 'Appointment rebooked successfully!');
+    } else {
+        return redirect()->back()->with('error', 'Failed to rebook appointment.');
+    }
     }
    public function rebook($id)
 {
