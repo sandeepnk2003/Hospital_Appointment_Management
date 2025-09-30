@@ -77,10 +77,10 @@
                        class="btn btn-success btn-sm">
                       Reshedule
                     </a>
-                     <a href="<?= base_url('patients/appointments/update/'. $a['id']); ?>" 
+                     <!-- <a href="<?= base_url('patients/appointments/update/'. $a['id']); ?>" 
                        class="btn btn-success btn-sm">
                       Completed
-                    </a>
+                    </a> -->
                   <?php elseif ($a['status'] === 'Cancelled'): ?>
                     
                        <span class="btn btn-sm btn-success">

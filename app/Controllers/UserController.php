@@ -6,6 +6,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\UserModel;
 use App\Models\DoctorModel;
+use App\Models\PatientModel;
+use App\Models\AppointmentModel;
+use App\Models\VisitModel;
 
 
 class UserController extends ResourceController
@@ -108,5 +111,44 @@ class UserController extends ResourceController
     {
         $this->userModel->delete($id);
         return redirect()->to('/users')->with('success', 'User deleted successfully');
+    }
+     public function index2($patientId)
+    {
+        $patientModel = new PatientModel();
+        $visitModel   = new VisitModel();
+
+        // Fetch patient details
+        $patient = $patientModel->find($patientId);
+        if (!$patient) {
+            return redirect()->back()->with('error', 'Patient not found');
+        }
+
+        // Fetch visits
+        $visits = $visitModel->where('patient_id', $patientId)
+                             ->orderBy('date', 'ASC')
+                             ->findAll();
+
+        // Prepare chart data
+        $visitDates = [];
+        $weightData = [];
+        $systolicData = [];
+        $diastolicData = [];
+
+        foreach($visits as $v){
+            $visitDates[] = date('d M', strtotime($v['date']));
+            $weightData[] = floatval(str_replace('kg','',$v['weight']));
+            $bpParts = explode('/', $v['blood_pressure']);
+            $systolicData[]  = intval($bpParts[0] ?? 0);
+            $diastolicData[] = intval($bpParts[1] ?? 0);
+        }
+
+        return view('users/index2', [
+            'patient'       => $patient,
+            'visits'        => $visits,
+            'visitDates'    => $visitDates,
+            'weightData'    => $weightData,
+            'systolicData'  => $systolicData,
+            'diastolicData' => $diastolicData
+        ]);
     }
 }

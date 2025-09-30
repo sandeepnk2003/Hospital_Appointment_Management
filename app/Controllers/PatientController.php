@@ -91,10 +91,17 @@ public function appointmentHistory()
 
     $patientId = session()->get('patient_id');
     $appointmentModel = new \App\Models\AppointmentModel();
-$data['appt'] = $appointmentModel
-    ->select('appointments.*, users.username as doctor_name, doctors.specialization')
+    // $appointmentId=$appointmentModel
+    // ->select('id')
+    // ->where('appointments.patient_id', $patientId)
+    // ->first();
+    // dd($appointmentId);
+
+     $data['appt'] = $appointmentModel
+    ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id')
     ->join('doctors', 'doctors.id = appointments.doctor_id')
     ->join('users', 'users.id = doctors.userid')
+    ->join('prescription','prescription.appointment_id=appointments.id')
     ->where('appointments.patient_id', $patientId)
     ->orderBy('appointments.start_datetime', 'DESC')
     ->findAll();
@@ -305,5 +312,6 @@ public function UpdateAppointment($id){
 
 
 }
+
 
 }

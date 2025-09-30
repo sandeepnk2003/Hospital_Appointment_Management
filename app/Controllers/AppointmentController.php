@@ -154,7 +154,7 @@ class AppointmentController extends ResourceController
         $appointmentModel = new AppointmentModel();
     $appointmentModel->update($id, ['status' => 'Completed']);
 
-    return redirect()->back()->with('message', 'Appointment marked as completed.');
+    return redirect()->to(base_url('/doctor_dashboard'))->with('message', 'Appointment marked as completed.');
     }
     public function markCancel($id)
 {

@@ -7,6 +7,14 @@ use CodeIgniter\RESTful\ResourceController;
 use App\Models\UserModel;
 use App\Models\DoctorModel;
 use App\Models\PatientModel;
+use App\Models\AppointmentModel;
+use App\Models\VisitModel;
+use App\Models\PrescriptionModel;
+use App\Models\PrescriptionMedicineModel;
+
+
+
+
 
 
 class DoctorController extends ResourceController
@@ -113,5 +121,93 @@ public function edit($id=null)
 
 return view('doctor/doctor-patient', $data);
     }
+     public function addVisit($appointmentId)
+    {
+        $appointmentModel = new AppointmentModel();
+        $appointment = $appointmentModel
+        ->select('patients.name as patient_name,appointments.*')
+        ->join('patients','patients.id=appointments.patient_id')
+        ->find($appointmentId);
+     
+        if (!$appointment) {
+            return redirect()->back()->with('error', 'Appointment not found');
+        }
+
+        return view('doctor/doctor_visit_form', ['appointment' => $appointment]);
+    }
+       public function saveVisit()
+    {
+        $visitModel = new VisitModel();
+        $appointmentModel = new AppointmentModel();
+
+        $appointmentId = $this->request->getPost('appointment_id');
+        $patientId     = $this->request->getPost('patient_id');
+        $DoctorId     = $this->request->getPost('doctor_id');
+
+    $existingVisit = $visitModel->where('appointment_id', $appointmentId)->first();
+    if ($existingVisit) {
+        return redirect()->back()->with('error', 'Visit already completed for this appointment.');
+    }
+        $data = [
+            'appointment_id'  => $appointmentId,
+            'patient_id'      => $patientId,
+            'doctor_id'       => $DoctorId,
+            'date'            => date('Y-m-d'),
+            'reason'          => $this->request->getPost('reason'),
+            'weight'          => $this->request->getPost('weight'),
+            'blood_pressure'  => $this->request->getPost('blood_pressure'),
+            'doctor_comments' => $this->request->getPost('doctor_comments'),
+        ];
+
+        $visitModel->insert($data);
+
+        // Mark appointment as completed
+        $appointmentModel->update($appointmentId, [
+            'status' => 'completed'
+        ]);
+
+        return redirect()->to('appointments/complete/'.$appointmentId)->with('success', 'Visit completed successfully!');
+    }
+    public function index2($patientId)
+    {
+        $patientModel = new PatientModel();
+        $visitModel   = new VisitModel();
+
+        // Fetch patient details
+        $patient = $patientModel->find($patientId);
+        if (!$patient) {
+            return redirect()->back()->with('error', 'Patient not found');
+        }
+
+        // Fetch visits
+        $visits = $visitModel->where('patient_id', $patientId)
+                             ->orderBy('date', 'ASC')
+                             ->findAll();
+
+        // Prepare chart data
+        $visitDates = [];
+        $weightData = [];
+        $systolicData = [];
+        $diastolicData = [];
+
+        foreach($visits as $v){
+            $visitDates[] = date('d M', strtotime($v['date']));
+            $weightData[] = floatval(str_replace('kg','',$v['weight']));
+            $bpParts = explode('/', $v['blood_pressure']);
+            $systolicData[]  = intval($bpParts[0] ?? 0);
+            $diastolicData[] = intval($bpParts[1] ?? 0);
+        }
+
+        return view('patient/index2', [
+            'patient'       => $patient,
+            'visits'        => $visits,
+            'visitDates'    => $visitDates,
+            'weightData'    => $weightData,
+            'systolicData'  => $systolicData,
+            'diastolicData' => $diastolicData
+        ]);
+    }
+
+
 }
 

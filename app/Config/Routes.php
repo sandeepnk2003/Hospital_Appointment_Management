@@ -42,6 +42,8 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->post('appointments/saveRebook','PatientController::saveRebook');
     $routes->get('appointments/reschedule/(:num)', 'PatientController::reschedule/$1');
 $routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
+    $routes->get('prescription/download/(:num)', 'PrescriptionController::download/$1');
+
 
     
     
@@ -57,6 +59,7 @@ $routes->group('users', ['filter' => 'auth'], function($routes) {
     $routes->post('update/(:num)', 'UserController::update/$1');
     $routes->get('delete/(:num)', 'UserController::delete/$1');
     $routes->match(['get', 'post'], 'add_from_user/(:num)', 'DoctorController::adddoctor/$1');
+    $routes->get('dashboard2/(:num)','UserController::index2/$1');
 });
 
 // ---------- DOCTORS ----------
@@ -66,6 +69,14 @@ $routes->group('doctors', ['filter' => 'auth'], function($routes) {
     $routes->post('edit/(:num)', 'DoctorController::edit/$1');
     $routes->get('delete/(:num)', 'DoctorController::delete/$1');
     $routes->get('patients/(:num)', 'DoctorController::doctorPatient/$1');
+    $routes->get('visit/(:num)','DoctorController::addVisit/$1');
+    $routes->post('visit/save','DoctorController::saveVisit');
+    $routes->get('dashboard2/(:num)','DoctorController::index2/$1');
+    $routes->get('prescription/(:num)','PrescriptionController::patientPrescription/$1');
+    $routes->post('prescriptions/store','PrescriptionController::prescriptionStore');
+
+    
+
 });
 
 // ---------- PATIENTS (Admin Access) ----------
@@ -94,6 +105,9 @@ $routes->group('appointments', ['filter' => 'auth'], function($routes) {
 
 
 $routes->get('Doctor/Api','ApiController::DoctorApi');
-$routes->get('Doctor/Api/Excel','ApiController::doctorStatsTodayExcel');
+$routes->get('Doctor/Api/Excel','ApiController::doctorStatsTodayExcel');    
+
+
+
 
 

@@ -15,9 +15,6 @@
             <a href="<?= base_url('patients/create'); ?>" class="btn btn-success">+ Add Patient</a>
         </div>
     </div>
-
-
-
     <!-- Success Message -->
     <?php if(session()->getFlashdata('success')): ?>
         <div class="alert alert-success">
@@ -36,7 +33,7 @@
                 <th>Gender</th>
                 <th>Created</th>
                 <th>Updated</th>
-                <th width="180">Actions</th>
+                <th width="300">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -58,6 +55,10 @@
                                onclick="return confirm('Are you sure you want to delete this patient?');">
                                Delete
                             </a>
+                             <a href="<?= base_url('doctors/dashboard2/'.$patient['id']); ?>" 
+                             class="btn btn-success btn-sm">
+                              👪 Patient_info
+                             </a>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -54,6 +54,7 @@
               <th>Date & Time</th>
               <th>Status</th>
               <th>Action</th>
+              <th>Prescription Download</th>
             </tr>
           </thead>
           <tbody>
@@ -91,6 +92,12 @@
                     </a>
                   <?php endif; ?>
                 </td>
+              <td>
+                <a href="<?= base_url('patient/prescription/download/' . $apptRow['prescription_id']) ?>" 
+                 class="btn btn-sm btn-success">
+               <i class="bi bi-download"></i> Download PDF
+                 </a>
+              </td>
               </tr>
             <?php endforeach; ?>
           </tbody>

@@ -60,6 +60,13 @@
               <i class="bi bi-heart"></i> My Patients
             </a>
           </li>
+           <?php endif; ?>
+          <?php if (session()->get('role') === 'doctor'): ?>
+          <li class="nav-item">
+            <a href="<?= base_url('doctors/patients/'.$id)?>" class="nav-link">
+              <i class="bi bi-gear"></i>  Settings
+            </a>
+          </li>
         <?php endif; ?>
       </ul>
     </div> <!-- ❌ Sidebar ends properly here -->
@@ -119,7 +126,7 @@
           <td><?= esc($appt['status']); ?></td>
          <td>
     <?php if ($appt['status'] === 'Scheduled'): ?>
-        <a href="<?= base_url('appointments/complete/'.$appt['id']); ?>" 
+        <a href="<?= base_url('doctors/visit/'.$appt['id']); ?>" 
            class="btn btn-success btn-sm">
            <i class="bi bi-check-circle"></i> Complete
         </a>
@@ -127,16 +134,23 @@
            class="btn btn-danger btn-sm">
            <i class="bi bi-x-circle"></i> Cancel
         </a>
-    <?php else: ?>
-        <span class="badge 
-            <?= $appt['status'] === 'Completed' ? 'bg-success' : 'bg-danger'; ?>">
-            <?= ucfirst($appt['status']); ?>
-        </span>
-        <button class="btn btn-warning btn-sm edit-status-btn" 
-                data-id="<?= $appt['id']; ?>">
-            <i class="bi bi-pencil-square"></i> Edit
-        </button>
+         <?php elseif ($appt['status'] === 'Completed'): ?>
+           <span class="btn btn-success btn-sm">
+           <i class="bi bi-check-circle"></i> Completed</span>
+         <?php else :?>
+           <span class="btn btn-danger btn-sm">
+           <i class="bi bi-check-circle"></i> Cancelled</span>
     <?php endif; ?>
+    <a href="<?= base_url('doctors/dashboard2/'.$appt['patient_id']); ?>" 
+           class="btn btn-success btn-sm">
+           👪 Patient_info
+        </a>
+         <?php if ($appt['status'] === 'Completed'): ?>
+         <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" 
+           class="btn btn-success btn-sm">
+           👪 Patient Prescription
+        </a>
+        <?php endif; ?>
 </td>
 
         </tr>
@@ -150,7 +164,7 @@
     </div> <!-- ✅ Main content ends properly -->
   </div>
 </div>
-<script>
+<!-- <script>
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".edit-status-btn").forEach(button => {
         button.addEventListener("click", function() {
@@ -158,7 +172,7 @@ document.addEventListener("DOMContentLoaded", function() {
             let apptId = this.getAttribute("data-id");
 
             row.querySelector("td:last-child").innerHTML = `
-                <a href="<?= base_url('appointments/complete/'); ?>${apptId}" 
+                <a href="<?= base_url('doctors/visit/'); ?>${apptId}" 
                    class="btn btn-success btn-sm">
                    <i class="bi bi-check-circle"></i> Complete
                 </a>
@@ -170,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-</script>
+</script> -->
 
 
     <!-- Footer -->
