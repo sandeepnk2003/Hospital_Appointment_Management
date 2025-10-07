@@ -60,7 +60,10 @@
 
         <?php if (session()->get('role') === 'admin' || session()->get('role') === 'superadmin'): ?>
           <li class="nav-item"><a href="<?= base_url('doctors') ?>" class="nav-link"><i class="bi bi-person-badge"></i> Manage Doctors</a></li>
+          <li class="nav-item"><a href="<?= base_url('availability') ?>" class="nav-link"><i class="bi bi-person-badge"></i>Manage Doctor_Availability</a></li>
+
           <li class="nav-item"><a href="<?= base_url('patients') ?>" class="nav-link"><i class="bi bi-heart"></i> Manage Patients</a></li>
+
         <?php endif; ?>
 
         <?php if (session()->get('role') === 'doctor'): ?>

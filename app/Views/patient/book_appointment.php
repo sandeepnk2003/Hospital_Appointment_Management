@@ -15,6 +15,10 @@
         <div class="card-header bg-primary text-white text-center">
           <h4>Book an Appointment</h4>
         </div>
+        
+        <?php if(session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger"><?= session()->getFlashdata('error'); ?></div>
+    <?php endif; ?>
         <div class="card-body p-4">
           <form method="post" action="<?= base_url('patient/book/save') ?>">
             

@@ -8,6 +8,8 @@ use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\DoctorModel;
 use App\Models\UserModel;
+use App\Models\DoctorAvailabilityModel;
+
 
 class PatientController extends ResourceController
 {
@@ -123,6 +125,7 @@ return view('patient/appointments_history', $data);
     public function saveBooking()
     {
         $appointmentModel = new AppointmentModel();
+
          $patientId= session()->get('patient_id');
             $start = $this->request->getPost('date') . ' ' . $this->request->getPost('time');
 
@@ -130,7 +133,35 @@ return view('patient/appointments_history', $data);
     $startDateTime = new \DateTime($start);
     $endDateTime   = (clone $startDateTime)->modify('+15 minutes');
 
-    $doctorId = $this->request->getPost('doctor_id');
+    $dayOfWeek = $startDateTime->format('l');
+$doctorAvailabilityModel=new DoctorAvailabilityModel();
+        // Validation: Check if doctor is already booked
+        $doctorId = $this->request->getPost('doctor_id');
+    
+        $availability = $doctorAvailabilityModel
+    ->where('doctor_id', $doctorId)
+    ->where('day_of_week', $dayOfWeek)
+    ->where('is_available', 1)
+    ->first();
+
+if (!$availability) {
+    return redirect()->back()
+        ->with('error', "Doctor is not available on $dayOfWeek.");
+}
+
+// 2️⃣ Check if requested time falls inside availability range
+$requestedStart = $startDateTime->format('H:i:s');
+$requestedEnd   = $endDateTime->format('H:i:s');
+
+if ($requestedStart < $availability['start_time'] || $requestedEnd > $availability['end_time']) {
+    return redirect()->back()
+        ->with(
+            'error',
+            "Doctor is available on $dayOfWeek from " .
+            date('h:i A', strtotime($availability['start_time'])) . " to " .
+            date('h:i A', strtotime($availability['end_time'])) . "."
+        );
+}
     $overlap = $appointmentModel->where('doctor_id', $doctorId)
         ->where('start_datetime <=', $endDateTime->format('Y-m-d H:i:s'))
         ->where('end_datetime >=', $startDateTime->format('Y-m-d H:i:s'))

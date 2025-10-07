@@ -7,12 +7,15 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 
+
 $routes->get('/', 'Home::index');
 
 // ---------- AUTH (Users/Admin/Doctors) ----------
 $routes->get('auth/login', 'AuthController::login');
 $routes->post('auth/login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
+
+
 
 // ---------- PATIENT AUTH ----------
 $routes->group('patient', function($routes) {
@@ -21,14 +24,13 @@ $routes->group('patient', function($routes) {
     $routes->get('logout', 'AuthController::Patient_logout');
     $routes->get('register','PatientController::create');
     $routes->post('register','PatientController::create');
-
-
 });
 
 // ---------- DASHBOARDS ----------
 $routes->group('', ['filter' => 'auth'], function($routes) {
     $routes->get('/dashboard','DashboardController::index');
     $routes->get('/doctor_dashboard','DashboardController::doctor_index');
+    
 });
 
 $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
@@ -41,12 +43,9 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->get('appointments/rebook/(:num)','PatientController::rebook/$1');
     $routes->post('appointments/saveRebook','PatientController::saveRebook');
     $routes->get('appointments/reschedule/(:num)', 'PatientController::reschedule/$1');
-$routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
+    $routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
     $routes->get('prescription/download/(:num)', 'PrescriptionController::download/$1');
-
-
-    
-    
+    $routes->get('doctorAvailability', 'DoctorAvailabilityController::patient_doctorAvailability');
 
 });
 
@@ -74,9 +73,6 @@ $routes->group('doctors', ['filter' => 'auth'], function($routes) {
     $routes->get('dashboard2/(:num)','DoctorController::index2/$1');
     $routes->get('prescription/(:num)','PrescriptionController::patientPrescription/$1');
     $routes->post('prescriptions/store','PrescriptionController::prescriptionStore');
-
-    
-
 });
 
 // ---------- PATIENTS (Admin Access) ----------
@@ -100,14 +96,21 @@ $routes->group('appointments', ['filter' => 'auth'], function($routes) {
     $routes->get('complete/(:num)', 'AppointmentController::markComplete/$1');
     $routes->get('cancel/(:num)', 'AppointmentController::markCancel/$1');
     $routes->get('export', 'AppointmentController::export');
-
 });
 
 
-$routes->get('Doctor/Api','ApiController::DoctorApi');
-$routes->get('Doctor/Api/Excel','ApiController::doctorStatsTodayExcel');    
+    $routes->get('Doctor/Api','ApiController::DoctorApi');
+    $routes->get('Doctor/Api/Excel','ApiController::doctorStatsTodayExcel');    
+
+$routes->group('availability', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'DoctorAvailabilityController::index');
+    $routes->post('store', 'DoctorAvailabilityController::store');
+    $routes->post('toggle/(:num)', 'DoctorAvailabilityController::toggle/$1');
 
 
+
+
+});
 
 
 

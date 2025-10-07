@@ -8,6 +8,8 @@ use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\userModel;
+use App\Models\DoctorAvailabilityModel;
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -37,7 +39,7 @@ class AppointmentController extends ResourceController
         $builder->where('DATE(appointments.start_datetime) >=', $startOfWeek)
                 ->where('DATE(appointments.start_datetime) <=', $endOfWeek);
     } elseif ($filter === 'month') {
-        $startOfMonth = date('Y-m-01');
+        $startOfMonth = date('Y-m-01'); 
         $endOfMonth   = date('Y-m-t');
         $builder->where('DATE(appointments.start_datetime) >=', $startOfMonth)
                 ->where('DATE(appointments.start_datetime) <=', $endOfMonth);
@@ -72,6 +74,7 @@ class AppointmentController extends ResourceController
     $doctorModel = new DoctorModel();
     $patientModel = new PatientModel();
     $appointmentModel = new AppointmentModel();
+    $doctorAvailabilityModel = new DoctorAvailabilityModel();
 
     if ($this->request->getMethod() === 'POST') {
         $startTime = $this->request->getPost('start_time');
@@ -80,8 +83,36 @@ class AppointmentController extends ResourceController
         $startDateTime = new \DateTime($startTime);
         $endDateTime   = (clone $startDateTime)->modify('+15 minutes');
 
+        // Get the day of the week (e.g., Monday, Tuesday, etc.)
+        $dayOfWeek = $startDateTime->format('l');
+
         // Validation: Check if doctor is already booked
         $doctorId = $this->request->getPost('doctor_id');
+    
+        $availability = $doctorAvailabilityModel
+    ->where('doctor_id', $doctorId)
+    ->where('day_of_week', $dayOfWeek)
+    ->where('is_available', 1)
+    ->first();
+
+if (!$availability) {
+    return redirect()->back()
+        ->with('error', "Doctor is not available on $dayOfWeek.");
+}
+
+// 2️⃣ Check if requested time falls inside availability range
+$requestedStart = $startDateTime->format('H:i:s');
+$requestedEnd   = $endDateTime->format('H:i:s');
+
+if ($requestedStart < $availability['start_time'] || $requestedEnd > $availability['end_time']) {
+    return redirect()->back()
+        ->with(
+            'error',
+            "Doctor is available on $dayOfWeek from " .
+            date('h:i A', strtotime($availability['start_time'])) . " to " .
+            date('h:i A', strtotime($availability['end_time'])) . "."
+        );
+}
         $overlap = $appointmentModel->where('doctor_id', $doctorId)
             ->where('start_datetime <=', $endDateTime->format('Y-m-d H:i:s'))
             ->where('end_datetime >=', $startDateTime->format('Y-m-d H:i:s'))
@@ -90,6 +121,7 @@ class AppointmentController extends ResourceController
         if ($overlap) {
             return redirect()->back()->withInput()->with('error', 'Doctor is already booked at this time!');
         }
+      
 
         // Save appointment
         $appointmentModel->save([
