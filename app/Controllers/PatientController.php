@@ -9,6 +9,7 @@ use App\Models\AppointmentModel;
 use App\Models\DoctorModel;
 use App\Models\UserModel;
 use App\Models\DoctorAvailabilityModel;
+use App\Models\HospitalModel;
 
 
 class PatientController extends ResourceController
@@ -19,26 +20,62 @@ public function index()
         $patientModel = new PatientModel();
 
         // fetch all patients
-        $data['patients'] = $patientModel->findAll();
-
+        $data['patients'] = $patientModel
+        // ->join('hospitals','hospitals.id=patients.hospital_id')
+        ->where('hospital_id', session('hospital_id'))
+        ->findAll();
+    //  dd($data);
         // pass to view as associative array
         return view('patient/index', $data);
     }
-     public function create()
-    {
-        if($this->request->getMethod()==='POST'){
-          $patientModel = new PatientModel();
-          $patientModel->save([
-            'name' => $this->request->getPost('name'),
-            'email'        => $this->request->getPost('email'),
-            'phone'        => $this->request->getPost('phone'),
-            'gender'       => $this->request->getPost('gender'),
-            'dob'          => $this->request->getPost('dob'),
-        ]);
-        return redirect()->to('/patients')->with('success', 'Patient added successfully');
+    public function create()
+{
+    helper(['form']);
+
+    if ($this->request->getMethod() === 'POST') {
+        $patientModel = new PatientModel();
+
+        // Define validation rules
+        $rules = [
+            'name'  => 'required|min_length[3]|max_length[100]',
+            'email' => 'required|valid_email',
+            'phone' => 'required|min_length[10]|max_length[15]',
+            'gender'=> 'required',
+            'dob'   => 'required|valid_date',
+        ];
+
+        if (!$this->validate($rules)) {
+            return redirect()->back()->withInput()->with('error', $this->validator->listErrors());
         }
-        return view('patient/create');
+
+        // Check if email already exists for this hospital
+        $email = $this->request->getPost('email');
+        $hospitalId = session('hospital_id');
+        $exist = $patientModel
+            ->where('hospital_id', $hospitalId)
+            ->where('email', $email)
+            ->first();
+
+        if ($exist) {
+            return redirect()->back()->withInput()->with('error', 'This email is already registered for this hospital.');
+        }
+
+        // Save patient
+        $patientModel->save([
+            'hospital_id' => $hospitalId,
+            'name'        => $this->request->getPost('name'),
+            'email'       => $email,
+            'phone'       => $this->request->getPost('phone'),
+            'gender'      => $this->request->getPost('gender'),
+            'dob'         => $this->request->getPost('dob'),
+        ]);
+
+        return redirect()->to('/patients')->with('success', 'Patient added successfully');
     }
+
+    return view('patient/create');
+}
+
   public function edit($id = null)
 {
     $patientModel = new PatientModel();
@@ -101,6 +138,7 @@ public function appointmentHistory()
 
      $data['appt'] = $appointmentModel
     ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id')
+    ->join('hospitals','hospitals.id=appointments.hospital_id')
     ->join('doctors', 'doctors.id = appointments.doctor_id')
     ->join('users', 'users.id = doctors.userid')
     ->join('prescription','prescription.appointment_id=appointments.id')
@@ -117,7 +155,9 @@ return view('patient/appointments_history', $data);
         $doctorModel = new DoctorModel();
         $data['doctors'] = $doctorModel
         ->select('users.username as name,doctors.*')
+        ->join('hospitals','hospitals.id=doctors.hospital_id')
         ->join('users','users.id=doctors.userid')
+        ->where('doctors.hospital_id', session('hospital_id'))
         ->find();
 
         return view('patient/book_appointment', $data);
@@ -180,6 +220,7 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
 }
    
      $data = [
+        'hospital_id'=>session('hospital_id'),
         'patient_id'     => session()->get('patient_id'),
         'doctor_id'      => $doctorId,
         'start_datetime' => $startDateTime->format('Y-m-d H:i:s'),
@@ -255,6 +296,7 @@ public function saveRebook()
 }
    
      $data = [
+        'hospital_id'=>session('hospital_id'),
         'patient_id'     => session()->get('patient_id'),
         'doctor_id'      => $doctorId,
         'start_datetime' => $startDateTime->format('Y-m-d H:i:s'),

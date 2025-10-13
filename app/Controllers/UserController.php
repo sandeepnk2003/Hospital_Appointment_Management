@@ -9,7 +9,7 @@ use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\VisitModel;
-
+use App\Models\HospitalModel;
 
 class UserController extends ResourceController
 {
@@ -28,12 +28,13 @@ class UserController extends ResourceController
         $doctorModel = new DoctorModel();
 
         // Fetch all users
-        $users = $userModel->findAll();
+        $users = $userModel->where('hospital_id', session('hospital_id'))->findAll();
 
         // Fetch all doctor user IDs
-        $doctorRecords = $doctorModel->select('userid')->findAll(); 
+        $doctorRecords = $doctorModel->select('userid')->where('hospital_id', session('hospital_id'))->findAll();
+        // dd($doctorRecords);
         $doctorUserIds = array_column($doctorRecords, 'userid'); // extract IDs into plain array
-
+        //  dd($doctorUserIds);
         // Pass to view
         return view('users/index', [
             'users'         => $users,
@@ -67,13 +68,19 @@ class UserController extends ResourceController
             ->withInput()
             ->with('validation', $validation); // send validation object
     }
-
+ $hospitalId = (int) session('hospital_id');
+if (!$hospitalId) {
+    return redirect()->back()->with('error', 'Please select a hospital first.');
+}
+// dd(session('hospital_id'));
     $data = [
+        'hospital_id'=>$hospitalId,
         'username' => $this->request->getPost('username'),
         'email'    => $this->request->getPost('email'),
         'password' => password_hash($this->request->getPost('password'), PASSWORD_BCRYPT),
         'role'     => $this->request->getPost('role'),
         'phoneno'  =>$this->request->getPost('phoneno'),
+        
     ];
     $this->userModel->save($data);
 

@@ -10,6 +10,7 @@ class CreateUserTable extends Migration
     {
           $this->forge->addField([
             'id'            => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+            'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
             'username'      => ['type' => 'VARCHAR', 'constraint' => '100'],
             'email'         => ['type' => 'VARCHAR', 'constraint' => '150', 'unique' => true],
             'password' => ['type' => 'VARCHAR', 'constraint' => '255'],
@@ -21,6 +22,7 @@ class CreateUserTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('users');
     }
 

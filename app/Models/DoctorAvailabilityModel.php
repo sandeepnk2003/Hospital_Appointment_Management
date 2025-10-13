@@ -12,7 +12,7 @@ class DoctorAvailabilityModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
-    protected $allowedFields    = ['doctor_id','day_of_week','start_time','end_time','shift_name','is_available','created_at','updated_at','deleted_at'];
+    protected $allowedFields    = ['hospital_id','doctor_id','day_of_week','start_time','end_time','shift_name','is_available','created_at','updated_at','deleted_at'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;

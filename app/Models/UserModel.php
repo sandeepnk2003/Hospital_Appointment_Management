@@ -13,6 +13,7 @@ class UserModel extends Model
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'hospital_id',
         'username',
         'email',
         'password',

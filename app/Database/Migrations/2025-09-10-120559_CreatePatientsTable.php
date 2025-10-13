@@ -15,6 +15,7 @@ class CreatePatientsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+              'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
             'name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 100,
@@ -22,7 +23,6 @@ class CreatePatientsTable extends Migration
             'email' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 150,
-                'unique'     => true,
             ],
             'phone' => [
                 'type'       => 'VARCHAR',
@@ -50,6 +50,8 @@ class CreatePatientsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey(['hospital_id', 'email']);
+        $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('patients');
     }
 

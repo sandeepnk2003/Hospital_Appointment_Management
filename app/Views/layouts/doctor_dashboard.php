@@ -63,8 +63,8 @@
            <?php endif; ?>
           <?php if (session()->get('role') === 'doctor'): ?>
           <li class="nav-item">
-            <a href="<?= base_url('doctors/patients/'.$id)?>" class="nav-link">
-              <i class="bi bi-gear"></i>  Settings
+            <a href="<?= base_url('doctors/appointments/'.$id)?>" class="nav-link">
+              <i class="bi bi-calendar-check"></i>  appointments
             </a>
           </li>
         <?php endif; ?>
@@ -144,12 +144,18 @@
     <a href="<?= base_url('doctors/dashboard2/'.$appt['patient_id']); ?>" 
            class="btn btn-success btn-sm">
            👪 Patient_info
-        </a>
-         <?php if ($appt['status'] === 'Completed'): ?>
-         <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" 
-           class="btn btn-success btn-sm">
-           👪 Patient Prescription
-        </a>
+         </a>
+         <?php if ($appt['status'] === 'Completed' && empty($appt['prescription_id'])): ?>
+                        <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" 
+                           class="btn btn-primary btn-sm">
+                           💊 Add Prescription
+                        </a>
+                        <?php endif; ?>
+                         <?php if ($appt['status'] === 'Completed' && ($appt['prescription_id'])): ?>
+                        <a href="<?= base_url('doctors/prescriptions/'.$appt['prescription_id']); ?>" 
+   class="btn btn-success btn-sm">
+   💊 View Prescription
+</a>
         <?php endif; ?>
 </td>
 

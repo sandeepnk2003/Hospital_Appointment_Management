@@ -8,6 +8,7 @@ use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\userModel;
+use App\Models\HospitalModel;
 
 class DashboardController extends ResourceController
 {
@@ -20,15 +21,18 @@ class DashboardController extends ResourceController
     $patientModel     = new \App\Models\PatientModel();
     $doctorModel      = new \App\Models\DoctorModel();
     $appointmentModel = new \App\Models\AppointmentModel();
-
+    $hospital_id=session('hospital_id');
     // Counts
-    $data['patientCount'] = $patientModel->countAllResults();
-    $data['doctorCount']  = $doctorModel->countAllResults();
-    $data['totalAppointments'] = $appointmentModel->countAllResults();
+    $data['patientCount'] = $patientModel->join('hospitals','hospitals.id=patients.hospital_id')->
+    where('hospital_id', $hospital_id)->countAllResults();
+    $data['doctorCount']  = $doctorModel ->join('hospitals','hospitals.id=doctors.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
+    $data['totalAppointments'] = $appointmentModel ->join('hospitals','hospitals.id=appointments.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
 
     // Today’s appointments
     $today = date('Y-m-d');
     $data['todayAppointments'] = $appointmentModel
+     ->join('hospitals','hospitals.id=appointments.hospital_id')
+     ->where('hospital_id', $hospital_id)
         ->where('DATE(start_datetime)', $today)
         ->countAllResults();
 
@@ -36,6 +40,8 @@ class DashboardController extends ResourceController
     $weekStart = date('Y-m-d', strtotime('monday this week'));
     $weekEnd   = date('Y-m-d', strtotime('sunday this week'));
     $data['weekAppointments'] = $appointmentModel
+        ->join('hospitals','hospitals.id=appointments.hospital_id')
+        ->where('hospital_id', $hospital_id)
         ->where('DATE(start_datetime) >=', $weekStart)
         ->where('DATE(start_datetime) <=', $weekEnd)
         ->countAllResults();
@@ -44,6 +50,8 @@ class DashboardController extends ResourceController
     $monthStart = date('Y-m-01');
     $monthEnd   = date('Y-m-t'); // last day of month
     $data['monthAppointments'] = $appointmentModel
+        ->join('hospitals','hospitals.id=appointments.hospital_id')
+         ->where('hospital_id', $hospital_id)
         ->where('DATE(start_datetime) >=', $monthStart)
         ->where('DATE(start_datetime) <=', $monthEnd)
         ->countAllResults();
@@ -59,14 +67,24 @@ class DashboardController extends ResourceController
   $patientModel     = new \App\Models\PatientModel();
     $doctorModel      = new \App\Models\DoctorModel();
     $appointmentModel = new \App\Models\AppointmentModel();
-$doctor = $doctorModel->where('userid', session()->get('user_id'))->first();
+$doctor = $doctorModel
+// ->join('hospitals','hospitals.id=doctors.hospital_id')
+->
+where('userid', session()->get('user_id'))
+->where('hospital_id', session('hospital_id'))
+->first();
+// dd($doctor);
 $doctorId = $doctor['id'];
 $data['id']=$doctorId;
+$hospital_id=session('hospital_id');
+// dd($hospital_id);
 //     print_r($doctorId);
 //  dd(session()->get());
     // Today
     $today = date('Y-m-d');
     $data['todayAppointmentsCount'] = $appointmentModel
+    // ->join('hospitals','hospitals.id=appointments.hospital_id')
+        // ->where('hospital_id', session('hospital_id'))
         ->where('DATE(start_datetime)', $today)
         ->where('doctor_id',$doctorId)
         ->countAllResults();
@@ -76,6 +94,8 @@ $data['id']=$doctorId;
     $weekStart = date('Y-m-d', strtotime('monday this week'));
     $weekEnd   = date('Y-m-d', strtotime('sunday this week'));
     $data['weekAppointmentsCount'] = $appointmentModel
+    // ->join('hospitals','hospitals.id=appointments.hospital_id')
+    // ->where('hospital_id', session('hospital_id'))
         ->where('doctor_id', $doctorId)
         ->where("DATE(start_datetime) BETWEEN '$weekStart' AND '$weekEnd'", null, false)
         ->countAllResults();
@@ -84,14 +104,19 @@ $data['id']=$doctorId;
     $monthStart = date('Y-m-01');
     $monthEnd   = date('Y-m-t');
     $data['monthAppointmentsCount'] = $appointmentModel
+        // ->join('hospitals','hospitals.id=appointments.hospital_id')
+        // ->where('hospital_id', session('hospital_id'))
         ->where('doctor_id', $doctorId)
         ->where("DATE(start_datetime) BETWEEN '$monthStart' AND '$monthEnd'", null, false)
         ->countAllResults();
-
+// dd($data);
     // Today’s appointments list
    $data['todayAppointments'] = $appointmentModel
-    ->select('appointments.*, patients.name as patient_name')
+    ->select('appointments.*, patients.name as patient_name,prescription.id as prescription_id')
+      ->join('prescription', 'prescription.appointment_id = appointments.id', 'left')
+    // ->join('hospitals','hospitals.id=appointments.hospital_id')
     ->join('patients', 'patients.id = appointments.patient_id')
+    // ->where('appointments.hospital_id', session('hospital_id'))
     ->where('doctor_id', $doctorId)
     ->where("DATE(start_datetime) =", $today)   // 👈 correct
     ->orderBy('start_datetime', 'ASC')
@@ -100,6 +125,7 @@ $data['id']=$doctorId;
 // // exit;
 
 //         print_r($data);
+
 
     return view('layouts/doctor_dashboard', $data);
 }
@@ -117,6 +143,8 @@ public function patient_index()
 
     // Upcoming appointments
     $data['upcomingCount'] = $appointmentModel
+    ->join('hospitals','hospitals.id=appointments.hospital_id')
+    // ->where('hospital_id', session('hospital_id'))
         ->where('patient_id', $patientId)
         // ->where('start_datetime >=', date('Y-m-d H:i:s'))
         ->where('status', 'Scheduled')
@@ -124,12 +152,15 @@ public function patient_index()
 
     // Completed
     $data['completedCount'] = $appointmentModel
+    ->join('hospitals','hospitals.id=appointments.hospital_id')
+    // ->where('hospital_id', session('hospital_id'))
         ->where('patient_id', $patientId)
         ->where('status', 'completed')
         ->countAllResults();
 
     // Canceled
     $data['canceledCount'] = $appointmentModel
+    ->join('hospitals','hospitals.id=appointments.hospital_id')
         ->where('patient_id', $patientId)
         ->where('status', 'Cancelled')
         ->countAllResults();
@@ -140,11 +171,14 @@ public function patient_index()
 
 $data['upcomingAppointments'] = $appointmentModel
     ->select('appointments.*, users.username as doctor_name')
+    // ->join('hospitals','hospitals.id=appointments.hospital_id')
     ->join('doctors', 'doctors.id = appointments.doctor_id')
     ->join('users','users.id=doctors.userid')
+    // ->where('hospital_id', session('hospital_id'))
     ->where('appointments.patient_id', $patientId)  // ✅ filter by patient
     // ->where('start_datetime >=', $today) 
-    ->where('appointments.status','Scheduled')          // ✅ upcoming only
+    ->where('appointments.status','Scheduled')    
+    // ->where()      // ✅ upcoming only
     ->orderBy('start_datetime', 'ASC')
     ->findAll();
 

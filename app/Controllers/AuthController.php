@@ -8,6 +8,7 @@ use App\Models\UserModel;
 use App\Models\PatientModel;
 use App\Models\OtpModel;
 use App\Models\DoctorModel;
+use App\Models\HospitalModel;
 
 
 
@@ -27,7 +28,10 @@ class AuthController extends ResourceController
             // echo "$email";
             // echo $password;
 
-            $user = $userModel->where('email', $email)->first();
+            $user = $userModel->where('email', $email)
+            ->where('hospital_id',session('hospital_id'))
+            ->first();
+        
             // print_r($user);
 
             if ($user && password_verify($password, $user['password'])) {
@@ -52,7 +56,17 @@ class AuthController extends ResourceController
 
     public function logout()
     {
-        session()->destroy();
+         $session = session();
+         $hospitalData = [
+        'hospital_id'   => $session->get('hospital_id'),
+        'hospital_name' => $session->get('hospital_name'),
+    ];
+    // dd($hospitalData);
+            // Remove only user-specific data
+    $session->remove(['user_id', 'email', 'username', 'role', 'isLoggedIn']);
+        $newSession = session();
+    $newSession->set($hospitalData);
+    //    dd(session()->get());
         return redirect()->to('auth/login');
     }
         public function Patient_login()
@@ -61,8 +75,13 @@ class AuthController extends ResourceController
             $email = $this->request->getPost('email');
 
             $patientModel = new PatientModel();
-            $patient = $patientModel->where('email', $email)->first();
-
+            $patient = $patientModel
+            // ->join('hospitals','hospitals.id=patients.hospital_id')
+            ->where('email', $email)
+            ->where('hospital_id', session('hospital_id'))
+            ->first();
+            // $patient['session']=session('hospital_id');
+//    dd($patient);
             if (!$patient) {
                 return redirect()->back()->with('error', 'No patient found with this email');
             }
@@ -72,6 +91,7 @@ class AuthController extends ResourceController
 
             $otpModel = new OtpModel();
             $otpModel->insert([
+                'hospital_id'=>session('hospital_id'),
                 'patient_id' => $patient['id'],
                 'otp'        => $otp,
                 'expires_at' => date('Y-m-d H:i:s', strtotime('+5 minutes')),
@@ -95,7 +115,10 @@ class AuthController extends ResourceController
             $otp   = $this->request->getPost('otp');
 
             $patientModel = new PatientModel();
-            $patient = $patientModel->where('email', $email)->first();
+            $patient = $patientModel
+            //  ->join('hospitals','hospitals.id=patients.hospital_id')
+            ->where('hospital_id', session('hospital_id'))
+            ->where('email', $email)->first();
 
             if (!$patient) {
                 return redirect()->back()->with('error', 'Invalid email');
@@ -103,6 +126,8 @@ class AuthController extends ResourceController
 
             $otpModel = new OtpModel();
             $otpRecord = $otpModel
+                // ->join('hospitals','hospitals.id=otps.hospital_id')
+                // ->where('hospital_id', session('hospital_id'))
                 ->where('patient_id', $patient['id'])
                 ->where('otp', $otp)
                 ->where('expires_at >=', date('Y-m-d H:i:s'))
@@ -110,7 +135,7 @@ class AuthController extends ResourceController
                 ->first();
 
            if ($otpRecord) {
-    session()->set([
+         session()->set([
         'patient_id'   => $patient['id'],
         'patient_name' => $patient['name'],
         'role'         => 'patient',   // ✅ role
@@ -132,8 +157,15 @@ class AuthController extends ResourceController
 
     public function Patient_logout()
     {
-        session()->destroy();
-        return redirect()->to('/patient/login');
+         $session = session();
+         $hospitalData = [
+              'hospital_id'   => $session->get('hospital_id'),
+              'hospital_name' => $session->get('hospital_name'),
+         ];
+         $session->remove(['patient_id', 'patient_name', 'role', 'isPatient', 'isLoggedIn']);
+         $newSession = session();
+         $newSession->set($hospitalData);
+         return redirect()->to('/patient/login');
     }
 
 

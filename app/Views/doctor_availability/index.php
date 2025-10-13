@@ -5,8 +5,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="p-4">
-<div class="container">
-    <h2 class="mb-4">Doctor Availability</h2>
+    <div class="container">
+ <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Doctor Availability</h2>
+    <a href="<?= base_url('dashboard'); ?>" class="btn btn-secondary">Back</a>
+</div>
 
     <?php if (session()->getFlashdata('success')): ?>
         <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>

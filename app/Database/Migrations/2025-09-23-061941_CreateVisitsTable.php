@@ -15,6 +15,7 @@ class CreateVisitsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+             'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
             'appointment_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
@@ -67,6 +68,7 @@ class CreateVisitsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
          $this->forge->addForeignKey('patient_id', 'patients', 'id', 'CASCADE', 'CASCADE');
          $this->forge->addForeignKey('doctor_id', 'doctors', 'id', 'CASCADE', 'CASCADE');
          $this->forge->addForeignKey('appointment_id', 'appointments', 'id', 'CASCADE', 'CASCADE');

@@ -12,7 +12,7 @@ class PrescriptionMedicineModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['prescription_id', 'medicine_name', 'frequency', 'duration', 'instruction'];
+    protected $allowedFields    = ['hospital_id','prescription_id', 'medicine_name', 'frequency', 'duration', 'instruction'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
