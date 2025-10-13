@@ -169,7 +169,7 @@ public function displayOnlyPrescription($id){
         ->join('users','users.id=doctors.userId')
         ->where('prescription.id', (int)$id)
         ->first();
-
+//   echo( $uri->getTotalSegments() );
     // Get all medicines for this prescription
     $medicines = $medicineModel
         ->where('prescription_id', $id)
