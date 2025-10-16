@@ -49,6 +49,7 @@
           <thead class="table-dark text-center">
             <tr>
               <th>#</th>
+              <th>Hospital_name</th>
               <th>Doctor</th>
               <th>Specialization</th>
               <th>Date & Time</th>
@@ -61,6 +62,7 @@
             <?php foreach ($appt as $index => $apptRow): ?>
               <tr>
                 <td class="text-center"><?= $index + 1 ?></td>
+                <td><?= esc($apptRow['hospital_name']) ?></td>
                 <td><?= esc($apptRow['doctor_name']) ?></td>
                 <td><?= esc($apptRow['specialization'] ?? 'N/A') ?></td>
                 <td>

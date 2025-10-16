@@ -150,7 +150,9 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
                        ->join('users', 'users.id = doctors.userid')
                        ->where('doctors.hospital_id',session('hospital_id'))
                        ->findAll();
-    $data['patients'] = $patientModel->where('hospital_id',session('hospital_id'))->findAll();
+    $data['patients'] = $patientModel
+    // ->where('hospital_id',session('hospital_id'))
+    ->findAll();
     return view('appointment/create', $data);
 }
 

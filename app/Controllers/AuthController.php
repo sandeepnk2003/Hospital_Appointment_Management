@@ -22,25 +22,39 @@ class AuthController extends ResourceController
 // exit;
         if ($this->request->getMethod() === 'POST') {
             $userModel = new UserModel();
+            $hospitalModel=new HospitalModel();
             $session   = session();
+            $hospital_id=$this->request->getVar('hospital_id');
+            $hospital=$hospitalModel->
+            select('hospital_name') 
+             ->asObject()
+            ->where('id',$hospital_id)
+             ->first();
+             $hospital_name=$hospital->hospital_name;
+            // dd($hospital_name);
             $email    = $this->request->getVar('email');
             $password = $this->request->getVar('password');
             // echo "$email";
             // echo $password;
 
             $user = $userModel->where('email', $email)
-            ->where('hospital_id',session('hospital_id'))
+            ->where('hospital_id',$hospital_id)
             ->first();
-        
+        //   $hopital_id=$
             // print_r($user);
+            // $data['hospitals']=$hospitalModel
+            // ->findAll();
 
             if ($user && password_verify($password, $user['password'])) {
                 $session->set([
+                    'hospital_id'=>$hospital_id,
+                    'hospital_name'=>$hospital_name,
                     'user_id'    => $user['id'],
                     'username'   => $user['username'],
                     'role'       => $user['role'],
                     'isLoggedIn' => true
                 ]); 
+                // dd($session->get());
                 if(session()->get('role')==='doctor'){
                       return redirect()->to('/doctor_dashboard');   
                 }
@@ -50,22 +64,26 @@ class AuthController extends ResourceController
                 return redirect()->back()->with('error', 'Invalid login credentials');
             }
         }
-
-        return view('auth/login');
+            $hospitalModel=new HospitalModel();
+         $data['hospitals']=$hospitalModel
+            ->findAll();
+        return view('auth/login',$data);
     }
 
     public function logout()
     {
          $session = session();
-         $hospitalData = [
-        'hospital_id'   => $session->get('hospital_id'),
-        'hospital_name' => $session->get('hospital_name'),
-    ];
+    //      $hospitalData = [
+    //     // 'hospital_id'   => $session->get('hospital_id'),
+    //     // 'hospital_name' => $session->get('hospital_name'),
+    // ];
     // dd($hospitalData);
             // Remove only user-specific data
-    $session->remove(['user_id', 'email', 'username', 'role', 'isLoggedIn']);
-        $newSession = session();
-    $newSession->set($hospitalData);
+    $session->destroy();//it will destroy eveything in the session
+    // $session->delete('hospital_id,hosital_name');
+    // dd($session->get());
+    //     $newSession = session();
+    // $newSession->set($hospitalData);
     //    dd(session()->get());
         return redirect()->to('auth/login');
     }
@@ -78,7 +96,7 @@ class AuthController extends ResourceController
             $patient = $patientModel
             // ->join('hospitals','hospitals.id=patients.hospital_id')
             ->where('email', $email)
-            ->where('hospital_id', session('hospital_id'))
+            // ->where('hospital_id', session('hospital_id'))
             ->first();
             // $patient['session']=session('hospital_id');
 //    dd($patient);
@@ -91,7 +109,7 @@ class AuthController extends ResourceController
 
             $otpModel = new OtpModel();
             $otpModel->insert([
-                'hospital_id'=>session('hospital_id'),
+                // 'hospital_id'=>session('hospital_id'),
                 'patient_id' => $patient['id'],
                 'otp'        => $otp,
                 'expires_at' => date('Y-m-d H:i:s', strtotime('+5 minutes')),
@@ -117,7 +135,7 @@ class AuthController extends ResourceController
             $patientModel = new PatientModel();
             $patient = $patientModel
             //  ->join('hospitals','hospitals.id=patients.hospital_id')
-            ->where('hospital_id', session('hospital_id'))
+            // ->where('hospital_id', session('hospital_id'))
             ->where('email', $email)->first();
 
             if (!$patient) {

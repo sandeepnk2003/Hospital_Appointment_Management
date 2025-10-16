@@ -20,7 +20,7 @@
             <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
         <?php endif; ?>
 
-        <form method="post" action="<?= base_url('doctor/prescriptions/'.$prescription['id'].'/update') ?>">
+        <form method="post" action="<?= base_url('doctors/prescriptions/'.$prescription['id']) ?>">
             <h5 class="mb-3">Medicines</h5>
 
             <div id="medicines">

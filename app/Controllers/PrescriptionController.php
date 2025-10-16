@@ -18,8 +18,9 @@ class PrescriptionController extends ResourceController
 
     // Fetch prescription header
     $prescription = $prescriptionModel
-        ->select('prescription.*,visits.reason,visits.doctor_comments,users.username as doctor_name, patients.name as patient_name')
+        ->select('prescription.*,visits.reason,visits.doctor_comments,users.username as doctor_name, patients.name as patient_name,hospitals.hospital_name as hospital_name')
         ->join('appointments', 'appointments.id = prescription.appointment_id')
+        ->join('hospitals','hospitals.id=appointments.hospital_id')
         ->join('doctors','appointments.doctor_id=doctors.id')
         ->join('users','doctors.userid=users.id')
         ->join('patients','appointments.patient_id=patients.id')
