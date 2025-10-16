@@ -58,7 +58,7 @@
         <!-- Submit -->
         <div>
             <button type="submit" class="btn btn-primary">Save Prescription</button>
-            <a href="<?= base_url('appointments/' . $appointmentId) ?>" class="btn btn-outline-secondary">Cancel</a>
+            <a href="<?= base_url('doctor_dashboard') ?>" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </form>
 </div>

@@ -7,6 +7,7 @@ use CodeIgniter\RESTful\ResourceController;
 use App\Models\DoctorModel;
 use App\Models\DoctorAvailabilityModel;
 use App\Models\UserModel;
+use App\Models\HospitalModel;
 
 use CodeIgniter\Controller;
 
@@ -23,16 +24,21 @@ class DoctorAvailabilityController extends ResourceController
         // Fetch all doctors for dropdown
         $data['doctors'] = $doctorModel
             ->select('doctors.id, users.username as doctors_name')
+            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
+            ->where('doctors.hospital_id', session('hospital_id'))
             ->findAll();
 
         // Fetch all availability records
         $availabilitiesRaw = $availabilityModel
             ->select('doctor_availability.*, users.username as doctors_name')
             ->join('doctors', 'doctors.id = doctor_availability.doctor_id')
+            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
+            ->where('doctors.hospital_id', session('hospital_id'))
             ->orderBy('day_of_week', 'ASC')
             ->findAll();
+
 
         // Group availabilities by day
         $grouped = [];
@@ -51,6 +57,7 @@ class DoctorAvailabilityController extends ResourceController
         $availabilityModel = new DoctorAvailabilityModel();
 
         $data = [
+            'hospital_id'=>session('hospital_id'),
             'doctor_id'   => $this->request->getPost('doctor_id'),
             'day_of_week' => $this->request->getPost('day_of_week'),
             'start_time'  => $this->request->getPost('start_time'),
@@ -90,15 +97,19 @@ public function patient_doctorAvailability(){
         // Fetch all doctors for dropdown
         $data['doctors'] = $doctorModel
             ->select('doctors.id, users.username as doctors_name')
+            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
+            ->where('doctors.hospital_id', session('hospital_id'))
             ->findAll();
 
         // Fetch all availability records
         $availabilitiesRaw = $availabilityModel
             ->select('doctor_availability.*, users.username as doctors_name,doctors.specialization as doctorSpecalization')
             ->join('doctors', 'doctors.id = doctor_availability.doctor_id')
+            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
             ->where('is_available',1)
+            ->where('doctors.hospital_id', session('hospital_id'))
             ->orderBy('day_of_week', 'ASC')
             ->findAll();
 

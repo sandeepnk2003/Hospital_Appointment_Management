@@ -8,6 +8,8 @@ use App\Models\DoctorModel;
 use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\userModel;
+use App\Models\HospitalModel;
+
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -23,11 +25,15 @@ class ApiController extends ResourceController
     // ->withDeleted()
     ->select('doctors.*,users.username as doctors_name')
     ->join('users','users.id=doctors.userid')
+    ->join('hospitals','hospitals.id=doctors.hospital_id')
+    ->where('hospital_id', session('hospital_id'))
     ->findAll();
    $result =[];
    $today=date('y-m-d');
     foreach($doctor as $doctors){
         $appointments=$AppointModel
+        ->join('hospitals','hospitals.id=appointments.hospital_id')
+        ->where('hospital_id', session('hospital_id'))
         ->where('doctor_id',$doctors['id'])
         ->where('Date(start_datetime)',$today)
         ->where('status','Completed')
@@ -68,6 +74,8 @@ class ApiController extends ResourceController
     $doctors = $doctorModel
         ->select('doctors.id, users.username as doctor_name, doctors.consultation_fee')
         ->join('users', 'users.id = doctors.userid')
+        ->join('hospitals','hospitals.id=doctors.hospital_id')
+        ->where('hospital_id', session('hospital_id'))
         ->findAll();
 
     // Create Spreadsheet
@@ -86,6 +94,8 @@ class ApiController extends ResourceController
     foreach ($doctors as $doctor) {
         // Count today’s appointments
         $appointments = $appointmentModel
+         ->join('hospitals','hospitals.id=appointments.hospital_id')
+         ->where('hospital_id', session('hospital_id'))
             ->where('doctor_id', $doctor['id'])
             ->where('DATE(start_datetime)', $today)
             ->where('status','Completed')

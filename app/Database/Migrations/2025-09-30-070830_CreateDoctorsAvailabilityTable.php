@@ -9,7 +9,8 @@ class CreateDoctorsAvailabilityTable extends Migration
     public function up()
     {
        $this->forge->addField([ 
-        'id' => [ 'type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true, ], 
+        'id' => [ 'type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true, ],
+         'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true], 
         'doctor_id' => [ 'type' => 'INT', 'constraint' => 11, 'unsigned' => true, ], 
         'day_of_week' => [ 'type' => 'ENUM', 'constraint' => [ 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday' ], ], 
         'start_time' => [ 'type' => 'TIME', 'null' => false, ], 
@@ -21,6 +22,7 @@ class CreateDoctorsAvailabilityTable extends Migration
         'deleted_at' => ['type' => 'DATETIME', 'null' => true], ]);
          $this->forge->addKey('id', true);
          $this->forge->addForeignKey('doctor_id', 'doctors', 'id', 'CASCADE', 'CASCADE'); 
+         $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
          $this->forge->createTable('doctor_availability'); 
     }
 

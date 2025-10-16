@@ -13,6 +13,7 @@ class OtpModel extends Model
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'hospital_id',
         'patient_id',
         'otp',
         'expires_at',

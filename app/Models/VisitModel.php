@@ -12,7 +12,7 @@ class VisitModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [ 'appointment_id',
+    protected $allowedFields    = ['hospital_id', 'appointment_id',
         'patient_id',
         'doctor_id',
         'date',

@@ -9,6 +9,9 @@ use CodeIgniter\Router\RouteCollection;
 
 
 $routes->get('/', 'Home::index');
+$routes->post('select-hospital','Home::setHospital');
+$routes->get('hospitaldashboard','Home::index1');
+
 
 // ---------- AUTH (Users/Admin/Doctors) ----------
 $routes->get('auth/login', 'AuthController::login');
@@ -72,7 +75,12 @@ $routes->group('doctors', ['filter' => 'auth'], function($routes) {
     $routes->post('visit/save','DoctorController::saveVisit');
     $routes->get('dashboard2/(:num)','DoctorController::index2/$1');
     $routes->get('prescription/(:num)','PrescriptionController::patientPrescription/$1');
+    $routes->get('appointments/(:num)','AppointmentController::DoctorPatientAppointment/$1');
     $routes->post('prescriptions/store','PrescriptionController::prescriptionStore');
+    $routes->get('prescriptions/(:num)','PrescriptionController::displayPrescription/$1');
+    $routes->get('prescriptions/view/(:num)','PrescriptionController::displayOnlyPrescription/$1');
+
+    $routes->post('prescriptions/(:num)/update', 'PrescriptionController::update/$1');
 });
 
 // ---------- PATIENTS (Admin Access) ----------
@@ -111,6 +119,5 @@ $routes->group('availability', ['filter' => 'auth'], function($routes) {
 
 
 });
-
 
 

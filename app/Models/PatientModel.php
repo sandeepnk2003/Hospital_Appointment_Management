@@ -13,6 +13,7 @@ class PatientModel extends Model
     protected $useSoftDeletes   = true;
     protected $protectFields    = true;
     protected $allowedFields    = [
+        'hospital_id',
         'name',
         'email',
         'phone',

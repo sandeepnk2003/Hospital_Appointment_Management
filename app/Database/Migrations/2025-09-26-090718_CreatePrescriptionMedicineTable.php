@@ -15,6 +15,7 @@ class CreatePrescriptionMedicineTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
+             'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
             'prescription_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
@@ -42,6 +43,7 @@ class CreatePrescriptionMedicineTable extends Migration
         ]);
         $this->forge->addPrimaryKey('id');
         $this->forge->addForeignKey('prescription_id','prescription','id','CASCADE','CASCADE');
+        $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('prescription_Medicine',true);
     }
 

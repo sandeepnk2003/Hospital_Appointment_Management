@@ -11,7 +11,7 @@ use App\Models\AppointmentModel;
 use App\Models\VisitModel;
 use App\Models\PrescriptionModel;
 use App\Models\PrescriptionMedicineModel;
-
+use App\Models\HospitalModel;
 
 
 
@@ -41,6 +41,7 @@ class DoctorController extends ResourceController
     // If the request is POST, insert doctor info
     if ($this->request->getMethod() === 'POST') {
         $data = [
+            'hospital_id'    =>session('hospital_id'),
             'userid'          => $id,
             'specialization'  => $this->request->getPost('specialization'),
             'qualification'   => $this->request->getPost('qualification'),
@@ -62,13 +63,16 @@ public function listdoctor(){
    
         $doctorModel = new DoctorModel();
         $userModel   = new UserModel();
-
+   $hospital_id=session('hospital_id');
+//    dd($hospital_id);
         // Join doctors with users to fetch doctor + user info
         $doctors = $doctorModel
             ->select('doctors.id as doctor_id, doctors.*, users.username, users.email')
+            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
+            ->where('doctors.hospital_id',$hospital_id )
             ->findAll();
-
+// dd($doctors);
         return view('doctor/index', ['doctors' => $doctors]);
     }
 
@@ -89,6 +93,7 @@ public function edit($id=null)
 
         if ($this->request->getMethod() === 'POST') {
             $data = [
+                'hospital_id'      =>session('hospital_id'),
                 'specialization'   => $this->request->getPost('specialization'),
                 'qualification'    => $this->request->getPost('qualification'),
                 'experience'       => $this->request->getPost('experience'),
@@ -113,9 +118,12 @@ public function edit($id=null)
         $patient=new PatientModel();
     $data['patients']=$patient->
     select('patients.*')->
-    join('appointments','appointments.patient_id=patients.id')->
-    join('doctors','appointments.doctor_id=doctors.id')->
-    where('doctors.id',$id)->
+    join('appointments','appointments.patient_id=patients.id')
+    ->join('hospitals','hospitals.id=patients.hospital_id')
+    ->join('doctors','appointments.doctor_id=doctors.id')->
+    where('doctors.id',$id)
+    ->where('patients.hospital_id', session('hospital_id'))
+    ->
     groupBy('patients.id')->
     findAll();
 
@@ -149,6 +157,7 @@ return view('doctor/doctor-patient', $data);
         return redirect()->back()->with('error', 'Visit already completed for this appointment.');
     }
         $data = [
+            'hospital_id'=>session('hospital_id'),
             'appointment_id'  => $appointmentId,
             'patient_id'      => $patientId,
             'doctor_id'       => $DoctorId,
@@ -181,6 +190,7 @@ return view('doctor/doctor-patient', $data);
 
         // Fetch visits
         $visits = $visitModel->where('patient_id', $patientId)
+                            // ->where('hodpital_id',session('hospital_id'))
                              ->orderBy('date', 'ASC')
                              ->findAll();
 

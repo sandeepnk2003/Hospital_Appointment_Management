@@ -9,6 +9,8 @@ use App\Models\PatientModel;
 use App\Models\AppointmentModel;
 use App\Models\userModel;
 use App\Models\DoctorAvailabilityModel;
+use App\Models\HospitalModel;
+
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -26,9 +28,12 @@ class AppointmentController extends ResourceController
 
     $builder = $appointmentModel
         ->select('appointments.*, patients.name as patient_name, users.username as doctor_name')
+         ->join('hospitals','hospitals.id=appointments.hospital_id')
         ->join('patients', 'patients.id = appointments.patient_id')
         ->join('doctors', 'doctors.id = appointments.doctor_id')
-        ->join('users', 'users.id = doctors.userid');
+        ->join('users', 'users.id = doctors.userid')
+        ->where('doctors.hospital_id', session('hospital_id'));
+        // ->findAll();
 
     // ✅ Apply filter: today/week/month
     if ($filter === 'today') {
@@ -57,7 +62,7 @@ class AppointmentController extends ResourceController
     if (!empty($date)) {
         $builder->where('DATE(appointments.start_datetime)', $date);
     }
-
+// dd($builder);
     // ✅ Get results
     $appointments = $builder->orderBy('appointments.start_datetime', 'DESC')->findAll();
 
@@ -90,6 +95,8 @@ class AppointmentController extends ResourceController
         $doctorId = $this->request->getPost('doctor_id');
     
         $availability = $doctorAvailabilityModel
+         ->join('hospitals','hospitals.id=doctor_availability.hospital_id')
+         ->where('hospital_id', session('hospital_id'))
     ->where('doctor_id', $doctorId)
     ->where('day_of_week', $dayOfWeek)
     ->where('is_available', 1)
@@ -113,7 +120,10 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
             date('h:i A', strtotime($availability['end_time'])) . "."
         );
 }
-        $overlap = $appointmentModel->where('doctor_id', $doctorId)
+        $overlap = $appointmentModel
+            ->join('hospitals','hospitals.id=appointments.hospital_id')
+            ->where('hospital_id', session('hospital_id'))
+            ->where('doctor_id', $doctorId)
             ->where('start_datetime <=', $endDateTime->format('Y-m-d H:i:s'))
             ->where('end_datetime >=', $startDateTime->format('Y-m-d H:i:s'))
             ->first();
@@ -125,6 +135,7 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
 
         // Save appointment
         $appointmentModel->save([
+            'hospital_id'=>session('hospital_id'),
             'doctor_id'  => $doctorId,
             'patient_id' => $this->request->getPost('patient_id'),
             'start_datetime' => $startDateTime->format('Y-m-d H:i:s'),
@@ -135,9 +146,11 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
     }
 
     $data['doctors'] = $doctorModel->select('doctors.id, users.username as name')
+                       ->join('hospitals','hospitals.id=doctors.hospital_id')
                        ->join('users', 'users.id = doctors.userid')
+                       ->where('doctors.hospital_id',session('hospital_id'))
                        ->findAll();
-    $data['patients'] = $patientModel->findAll();
+    $data['patients'] = $patientModel->where('hospital_id',session('hospital_id'))->findAll();
     return view('appointment/create', $data);
 }
 
@@ -158,7 +171,9 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
 
         // ❌ Validation: Check for doctor double-booking
         $conflict = $appointmentModel
+            ->join('hospitals','hospitals.id=appointments.hospital_id')
             ->where('doctor_id', $doctor_id)
+            ->where('hospital_id', session('hospital_id'))
             ->groupStart()
                 ->where("('$start' BETWEEN start_datetime AND end_datetime)")
                 ->orWhere("('$end' BETWEEN start_datetime AND end_datetime)")
@@ -173,6 +188,7 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
 
         // ✅ Save appointment
         $appointmentModel->save([
+            'hospital_id'=>session('hospital_id'),
             'doctor_id'      => $doctor_id,
             'patient_id'     => $patient_id,
             'start_datetime' => $start,
@@ -211,9 +227,11 @@ public function export()
     // Base query
     $builder = $appointmentModel
         ->select('appointments.id, patients.name as patient_name, users.username as doctor_name, appointments.start_datetime, appointments.end_datetime, appointments.status')
+         ->join('hospitals','hospitals.id=appointments.hospital_id')
         ->join('patients', 'patients.id = appointments.patient_id')
         ->join('doctors', 'doctors.id = appointments.doctor_id')
-        ->join('users', 'users.id = doctors.userid');
+        ->join('users', 'users.id = doctors.userid')
+        ->where('hospital_id', session('hospital_id'));
 
     // Apply filter: today / week / month
     if ($filter === 'today') {
@@ -280,6 +298,64 @@ public function export()
 
     $writer->save('php://output');
     exit();
+}
+public function DoctorPatientAppointment($doctorId){
+  $appointmentModel = new AppointmentModel();
+
+    $filter = $this->request->getGet('filter');   // today/week/month
+    $search = $this->request->getGet('search');   // doctor/patient name
+    $date   = $this->request->getGet('date');     // specific date
+    $today  = date('Y-m-d');
+
+    $builder = $appointmentModel
+        ->select('appointments.*, patients.name as patient_name, users.username as doctor_name,prescription.id as prescription_id')
+        //  ->join('hospitals','hospitals.id=appointments.hospital_id')
+         ->join('prescription','prescription.appointment_id=appointments.id','left')
+        ->join('patients', 'patients.id = appointments.patient_id')
+        ->join('doctors', 'doctors.id = appointments.doctor_id')
+        ->join('users', 'users.id = doctors.userid')
+        ->where('doctors.hospital_id', session('hospital_id'))
+        ->where('appointments.doctor_id',$doctorId);
+        // ->where('status','completed');
+        // ->findAll();
+
+    // ✅ Apply filter: today/week/month
+    if ($filter === 'today') {
+        $builder->where('DATE(appointments.start_datetime)', $today);
+    } elseif ($filter === 'week') {
+        $startOfWeek = date('Y-m-d', strtotime('monday this week'));
+        $endOfWeek   = date('Y-m-d', strtotime('sunday this week'));
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfWeek)
+                ->where('DATE(appointments.start_datetime) <=', $endOfWeek);
+    } elseif ($filter === 'month') {
+        $startOfMonth = date('Y-m-01'); 
+        $endOfMonth   = date('Y-m-t');
+        $builder->where('DATE(appointments.start_datetime) >=', $startOfMonth)
+                ->where('DATE(appointments.start_datetime) <=', $endOfMonth);
+    }
+
+    // ✅ Apply search filter (doctor name OR patient name)
+    if (!empty($search)) {
+        $builder->groupStart()
+                ->like('patients.name', $search)
+                ->orLike('users.username', $search)
+                ->groupEnd();
+    }
+
+    // ✅ Apply date filter (exact match on start_datetime)
+    if (!empty($date)) {
+        $builder->where('DATE(appointments.start_datetime)', $date);
+    }
+// dd($builder);
+    // ✅ Get results
+    $appointments = $builder->orderBy('appointments.start_datetime', 'DESC')->findAll();
+
+    return view('appointment/doctor_patient_Appointment', [
+        'appointments' => $appointments,
+        'filter'       => $filter,
+        'search'       => $search,
+        'date'         => $date
+    ]);
 }
 
 }

@@ -10,6 +10,7 @@ class CreateDoctorTable extends Migration
 {
     $this->forge->addField([
         'id'            => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+         'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
         'userid'             => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
         'specialization' => ['type' => 'VARCHAR', 'constraint' => '150'],
         'qualification'  => ['type' => 'VARCHAR', 'constraint' => '150', 'null' => true],
@@ -20,6 +21,7 @@ class CreateDoctorTable extends Migration
         'deleted_at' => ['type' => 'DATETIME', 'null' => true],
     ]);
     $this->forge->addKey('id', true);
+    $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
     $this->forge->addForeignKey('userid', 'users', 'id', 'CASCADE', 'CASCADE');
     $this->forge->createTable('doctors');
 }
