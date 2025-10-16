@@ -21,7 +21,7 @@
 
     <!-- Hospital Header -->
     <div class="header">
-        <h1><?php  echo session('hospital_name'); ?></h1>
+        <h1><?php  echo $prescription['hospital_name']; ?></h1>
         <p>AI Innovation center Gangamma layout Agrahara main road Kogilu Yelahanka - 560064</p>
         <p>Phone: +91 8050750015 | Email: nksandeep@citycare.com</p>
     </div>

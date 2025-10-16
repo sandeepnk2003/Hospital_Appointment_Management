@@ -21,6 +21,7 @@ public function index()
 
         // fetch all patients
         $data['patients'] = $patientModel
+        ->join('appointments','appointments.patient_id=patients.id')
         // ->join('hospitals','hospitals.id=patients.hospital_id')
         ->where('hospital_id', session('hospital_id'))
         ->findAll();
@@ -50,19 +51,19 @@ public function index()
 
         // Check if email already exists for this hospital
         $email = $this->request->getPost('email');
-        $hospitalId = session('hospital_id');
+        // $hospitalId = session('hospital_id');
         $exist = $patientModel
-            ->where('hospital_id', $hospitalId)
+            // ->where('hospital_id', $hospitalId)
             ->where('email', $email)
             ->first();
 
         if ($exist) {
-            return redirect()->back()->withInput()->with('error', 'This email is already registered for this hospital.');
+            return redirect()->back()->withInput()->with('error', 'This email is already registered');
         }
 
         // Save patient
-        $patientModel->save([
-            'hospital_id' => $hospitalId,
+        $patientModel->save([   
+            // 'hospital_id' => $hospitalId,
             'name'        => $this->request->getPost('name'),
             'email'       => $email,
             'phone'       => $this->request->getPost('phone'),
@@ -137,7 +138,7 @@ public function appointmentHistory()
     // dd($appointmentId);
 
      $data['appt'] = $appointmentModel
-    ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id')
+    ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id,hospitals.hospital_name as hospital_name')
     ->join('hospitals','hospitals.id=appointments.hospital_id')
     ->join('doctors', 'doctors.id = appointments.doctor_id')
     ->join('users', 'users.id = doctors.userid')
@@ -151,17 +152,32 @@ return view('patient/appointments_history', $data);
   
  public function book()
     {
-        // Load doctors for dropdown
+        $hospitalModel = new HospitalModel();
         $doctorModel = new DoctorModel();
-        $data['doctors'] = $doctorModel
-        ->select('users.username as name,doctors.*')
-        ->join('hospitals','hospitals.id=doctors.hospital_id')
-        ->join('users','users.id=doctors.userid')
-        ->where('doctors.hospital_id', session('hospital_id'))
-        ->find();
+
+        // Load all hospitals
+        $data['hospitals'] = $hospitalModel->findAll();
+
+        // Optional: initially empty doctors list
+        $data['doctors'] = [];
 
         return view('patient/book_appointment', $data);
     }
+
+     public function getDoctorsByHospital()
+    {
+        $hospital_id = $this->request->getPost('hospital_id');
+
+        $doctorModel = new DoctorModel();
+        $doctors = $doctorModel
+            ->select('users.username as name, doctors.*')
+            ->join('users', 'users.id = doctors.userid')
+            ->where('doctors.hospital_id', $hospital_id)
+            ->findAll();
+
+        return $this->response->setJSON($doctors);
+    }
+
     public function saveBooking()
     {
         $appointmentModel = new AppointmentModel();
@@ -218,9 +234,10 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
     if ($patientOverlap) {
     return redirect()->back()->withInput()->with('error', 'You already have an appointment at this time!');
 }
-   
+   $hospital_id=$this->request->getVar('hospital_id');
+//    dd($hospital_id);
      $data = [
-        'hospital_id'=>session('hospital_id'),
+        'hospital_id'=> $hospital_id,
         'patient_id'     => session()->get('patient_id'),
         'doctor_id'      => $doctorId,
         'start_datetime' => $startDateTime->format('Y-m-d H:i:s'),

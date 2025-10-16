@@ -8,9 +8,9 @@ use CodeIgniter\Router\RouteCollection;
 
 
 
-$routes->get('/', 'Home::index');
-$routes->post('select-hospital','Home::setHospital');
-$routes->get('hospitaldashboard','Home::index1');
+// $routes->get('/', 'Home::index');
+// $routes->post('select-hospital','Home::setHospital');
+$routes->get('/','Home::index1');
 
 
 // ---------- AUTH (Users/Admin/Doctors) ----------
@@ -42,13 +42,16 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->post('update(:num)', 'PatientController::edit/$1');
     $routes->get('appointments/history', 'PatientController::appointmentHistory');
     $routes->get('book','PatientController::book');
+    $routes->post('getDoctorsByHospital', 'PatientController::getDoctorsByHospital');
     $routes->post('book/save','PatientController::saveBooking');
     $routes->get('appointments/rebook/(:num)','PatientController::rebook/$1');
     $routes->post('appointments/saveRebook','PatientController::saveRebook');
     $routes->get('appointments/reschedule/(:num)', 'PatientController::reschedule/$1');
     $routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
     $routes->get('prescription/download/(:num)', 'PrescriptionController::download/$1');
-    $routes->get('doctorAvailability', 'DoctorAvailabilityController::patient_doctorAvailability');
+    $routes->get('doctorAvailability', 'DoctorAvailabilityController::doctorAvailability');
+    $routes->post('getAvailabilityByHospital', 'DoctorAvailabilityController::getAvailabilityByHospital');
+
 
 });
 
@@ -78,6 +81,8 @@ $routes->group('doctors', ['filter' => 'auth'], function($routes) {
     $routes->get('appointments/(:num)','AppointmentController::DoctorPatientAppointment/$1');
     $routes->post('prescriptions/store','PrescriptionController::prescriptionStore');
     $routes->get('prescriptions/(:num)','PrescriptionController::displayPrescription/$1');
+    $routes->post('prescriptions/(:num)','PrescriptionController::update/$1');
+
     $routes->get('prescriptions/view/(:num)','PrescriptionController::displayOnlyPrescription/$1');
 
     $routes->post('prescriptions/(:num)/update', 'PrescriptionController::update/$1');

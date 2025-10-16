@@ -29,7 +29,7 @@ class Home extends BaseController
 
         // ✅ Store hospital info in session
         session()->set([
-            'hospital_id' => $hospital['id'],
+            // 'hospital_id' => $hospital['id'],
             'hospital_name' => $hospital['hospital_name']
         ]);
         // dd(session()->get('hospital_id'));

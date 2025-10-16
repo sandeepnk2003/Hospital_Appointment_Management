@@ -28,7 +28,7 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="/hospitaldashboard"><?= session('hospital_name') ?></a>
+        <a class="navbar-brand fw-bold" href="/hospitaldashboard">Hospital Appointment Portal</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -47,7 +47,7 @@
 <!-- Hero Section -->
 <section class="hero">
     <div class="container">
-        <h1 class="display-4 fw-bold">Welcome to <?= session('hospital_name') ?></h1>
+        <h1 class="display-4 fw-bold">Welcome to Hospital Appointment Portal</h1>
         <p class="lead">Caring for you since 2025 – founded by Dr. Sandeep Shetty</p>
     </div>
 </section>
@@ -57,7 +57,7 @@
     <div class="container">
         <h2 class="mb-4 text-center">About Us</h2>
         <p class="lead text-center">
-            <?= session('hospital_name') ?> was founded in 2025 by <strong>Dr. Sandeep Shetty</strong> with a vision to provide affordable and 
+            Hospital Appointment Portal was founded in 2025 by <strong>Dr. Sandeep Shetty</strong> with a vision to provide affordable and 
             quality healthcare to everyone. Over the years, we’ve grown into a 500-bed multi-specialty hospital 
             with state-of-the-art facilities and a team of dedicated doctors and staff.
         </p>

@@ -119,13 +119,14 @@ public function edit($id=null)
     $data['patients']=$patient->
     select('patients.*')->
     join('appointments','appointments.patient_id=patients.id')
-    ->join('hospitals','hospitals.id=patients.hospital_id')
+    // ->join('hospitals','hospitals.id=appointm.hospital_id')
     ->join('doctors','appointments.doctor_id=doctors.id')->
     where('doctors.id',$id)
-    ->where('patients.hospital_id', session('hospital_id'))
+    ->where('appointments.hospital_id', session('hospital_id'))
     ->
     groupBy('patients.id')->
     findAll();
+    // dd($data);
 
 return view('doctor/doctor-patient', $data);
     }

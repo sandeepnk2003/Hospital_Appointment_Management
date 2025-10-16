@@ -47,9 +47,9 @@
         <li class="nav-item">
           <a class="nav-link" href="<?= base_url('patient/book') ?>">Book an Appointment</a>
         </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
           <a class="nav-link" href="<?= base_url('patient/doctorAvailability') ?>">Doctors Availability Info</a>
-        </li>
+        </li> --> 
       </ul>
       <span class="navbar-text text-white me-3">
         Logged in as <strong><?= session()->get('patient_name') ?></strong>

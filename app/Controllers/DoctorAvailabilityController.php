@@ -125,4 +125,44 @@ public function patient_doctorAvailability(){
 
         return view('doctor_availability/patientindex', $data);
 }
+public function doctorAvailability()
+{
+    $hospitalModel = new \App\Models\HospitalModel();
+    $data['hospitals'] = $hospitalModel->findAll();
+
+    $data['days'] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    $data['availabilities'] = [];
+
+    return view('doctor_availability/patientindex', $data);
+}
+
+public function getAvailabilityByHospital()
+{
+    $hospital_id = $this->request->getPost('hospital_id');
+
+    if (!$hospital_id) {
+        return $this->response->setJSON(['error' => 'Hospital ID missing']);
+    }
+
+    $availabilityModel = new \App\Models\DoctorAvailabilityModel();
+    $doctors = $availabilityModel
+        ->select('doctor_availability.*, users.username as doctors_name, doctors.specialization as doctorSpecalization')
+        ->join('doctors', 'doctors.id = doctor_availability.doctor_id')
+        ->join('users', 'users.id = doctors.userid')
+        ->where('doctors.hospital_id', $hospital_id)
+        ->findAll();
+
+    $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    $grouped = [];
+
+    foreach ($days as $day) {
+        $grouped[$day] = [];
+    }
+
+    foreach ($doctors as $d) {
+        $grouped[$d['day']][] = $d;
+    }
+
+    return $this->response->setJSON($grouped);
+}
 }

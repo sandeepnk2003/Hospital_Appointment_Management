@@ -23,8 +23,10 @@ class DashboardController extends ResourceController
     $appointmentModel = new \App\Models\AppointmentModel();
     $hospital_id=session('hospital_id');
     // Counts
-    $data['patientCount'] = $patientModel->join('hospitals','hospitals.id=patients.hospital_id')->
-    where('hospital_id', $hospital_id)->countAllResults();
+    $data['patientCount'] = $patientModel
+    ->join('appointments','appointments.patient_id=patients.id')->
+    where('appointments.hospital_id', $hospital_id)
+    ->countAllResults();
     $data['doctorCount']  = $doctorModel ->join('hospitals','hospitals.id=doctors.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
     $data['totalAppointments'] = $appointmentModel ->join('hospitals','hospitals.id=appointments.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
 
@@ -84,7 +86,7 @@ $hospital_id=session('hospital_id');
     $today = date('Y-m-d');
     $data['todayAppointmentsCount'] = $appointmentModel
     // ->join('hospitals','hospitals.id=appointments.hospital_id')
-        // ->where('hospital_id', session('hospital_id'))
+    // ->where('hospital_id', session('hospital_id'))
         ->where('DATE(start_datetime)', $today)
         ->where('doctor_id',$doctorId)
         ->countAllResults();
@@ -142,18 +144,18 @@ public function patient_index()
     $today = date('Y-m-d');
 
     // Upcoming appointments
-    $data['upcomingCount'] = $appointmentModel
-    ->join('hospitals','hospitals.id=appointments.hospital_id')
+     $data['upcomingCount'] = $appointmentModel
+       ->join('hospitals','hospitals.id=appointments.hospital_id')
     // ->where('hospital_id', session('hospital_id'))
         ->where('patient_id', $patientId)
-        // ->where('start_datetime >=', date('Y-m-d H:i:s'))
+    // ->where('start_datetime >=', date('Y-m-d H:i:s'))
         ->where('status', 'Scheduled')
         ->countAllResults();
 
-    // Completed
-    $data['completedCount'] = $appointmentModel
-    ->join('hospitals','hospitals.id=appointments.hospital_id')
-    // ->where('hospital_id', session('hospital_id'))
+     // Completed
+     $data['completedCount'] = $appointmentModel
+        ->join('hospitals','hospitals.id=appointments.hospital_id')
+     // ->where('hospital_id', session('hospital_id'))
         ->where('patient_id', $patientId)
         ->where('status', 'completed')
         ->countAllResults();
@@ -165,9 +167,9 @@ public function patient_index()
         ->where('status', 'Cancelled')
         ->countAllResults();
 
-    // Upcoming appointments list
-// $patientId = session()->get('patient_id');
-// $today     = date('Y-m-d H:i:s');
+     // Upcoming appointments list
+     // $patientId = session()->get('patient_id');
+     // $today     = date('Y-m-d H:i:s');
 
 $data['upcomingAppointments'] = $appointmentModel
     ->select('appointments.*, users.username as doctor_name')

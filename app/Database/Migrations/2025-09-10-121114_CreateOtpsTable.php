@@ -15,7 +15,7 @@ class CreateOtpsTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-             'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+            //  'hospital_id'=>['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
             'patient_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
@@ -35,7 +35,7 @@ class CreateOtpsTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
+        // $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
         $this->forge->addForeignKey('patient_id', 'patients', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('otps');
     }
