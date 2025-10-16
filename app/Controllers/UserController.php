@@ -65,8 +65,8 @@ class UserController extends ResourceController
 
     if (!$this->validate($rules)) {
         return redirect()->to('/users/create')
-            ->withInput()
-            ->with('validation', $validation); // send validation object
+               ->withInput()
+               ->with('validation', $validation); // send validation object
     }
  $hospitalId = (int) session('hospital_id');
 if (!$hospitalId) {
