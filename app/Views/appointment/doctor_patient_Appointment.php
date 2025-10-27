@@ -10,7 +10,7 @@
         <h2>Appointment Management</h2>
    <div>
             <a href="<?= base_url('/doctor_dashboard'); ?>" class="btn btn-secondary me-2">Back</a>
-            <a href="<?= base_url('appointments/create'); ?>" class="btn btn-success">+ Add appointment</a>
+            <!-- <a href="<?= base_url('appointments/create'); ?>" class="btn btn-success">+ Add appointment</a> -->
         </div>
 </div>
 
@@ -91,14 +91,14 @@
                 </td>
                 <!-- <td></td> -->
                 <td>
-                 <?php if ($a['status'] === 'Completed'): ?>
+                 <?php if ($a['status'] === 'Completed' &&  ($a['prescription_id'])): ?>
          <a href="<?= base_url('doctors/prescriptions/view/'.$a['prescription_id']); ?>" 
            class="btn btn-success btn-sm">
            👪 Patient Prescription
         </a>
         <?php endif; ?>
                  </td>
-                    </tr>
+                    </tr>   
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr><td colspan="6" class="text-center">No appointments found.</td></tr>

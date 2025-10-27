@@ -24,9 +24,12 @@ class DashboardController extends ResourceController
     $hospital_id=session('hospital_id');
     // Counts
     $data['patientCount'] = $patientModel
-    ->join('appointments','appointments.patient_id=patients.id')->
-    where('appointments.hospital_id', $hospital_id)
+    ->select('patients.id AS patient_id, patients.name, patients.email, appointments.id AS appointment_id')
+    ->join('appointments', 'appointments.patient_id = patients.id')
+    ->where('appointments.hospital_id', $hospital_id)
+    ->groupBy('patients.id')
     ->countAllResults();
+    // dd($data['patients']);
     $data['doctorCount']  = $doctorModel ->join('hospitals','hospitals.id=doctors.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
     $data['totalAppointments'] = $appointmentModel ->join('hospitals','hospitals.id=appointments.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
 
@@ -114,19 +117,20 @@ $hospital_id=session('hospital_id');
 // dd($data);
     // Today’s appointments list
    $data['todayAppointments'] = $appointmentModel
-    ->select('appointments.*, patients.name as patient_name,prescription.id as prescription_id')
+    ->select('appointments.*, patients.name as patient_name,prescription.id as prescription_id,payments.id as payment_id')
       ->join('prescription', 'prescription.appointment_id = appointments.id', 'left')
     // ->join('hospitals','hospitals.id=appointments.hospital_id')
     ->join('patients', 'patients.id = appointments.patient_id')
+    ->join('payments','payments.appointment_id=appointments.id','left')
     // ->where('appointments.hospital_id', session('hospital_id'))
-    ->where('doctor_id', $doctorId)
+    ->where('appointments.doctor_id', $doctorId)
     ->where("DATE(start_datetime) =", $today)   // 👈 correct
     ->orderBy('start_datetime', 'ASC')
     ->findAll();
 //     echo $appointmentModel->getLastQuery(); 
 // // exit;
 
-//         print_r($data);
+    //   dd($data);
 
 
     return view('layouts/doctor_dashboard', $data);

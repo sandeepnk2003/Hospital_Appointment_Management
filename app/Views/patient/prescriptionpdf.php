@@ -28,6 +28,7 @@
 
     <!-- Patient & Doctor Info -->
     <div class="info">
+        <!-- <p><strong>Hospital Name:</strong> <?= esc($prescription['hospital_name'] ?? 'N/A') ?></p> -->
         <p><strong>Patient Name:</strong> <?= esc($prescription['patient_name'] ?? 'N/A') ?></p>
         <p><strong>Doctor Name:</strong> <?= esc($prescription['doctor_name'] ?? 'N/A') ?></p>
         <p><strong>Appointment ID:</strong> <?= esc($prescription['appointment_id']) ?></p>

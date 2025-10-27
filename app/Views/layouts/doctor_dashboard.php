@@ -126,38 +126,61 @@
           <td><?= esc($appt['status']); ?></td>
          <td>
     <?php if ($appt['status'] === 'Scheduled'): ?>
-        <a href="<?= base_url('doctors/visit/'.$appt['id']); ?>" 
-           class="btn btn-success btn-sm">
-           <i class="bi bi-check-circle"></i> Complete
+        <a href="<?= base_url('doctors/visit/'.$appt['id']); ?>" class="btn btn-success btn-sm">
+            <i class="bi bi-check-circle"></i> Complete
         </a>
-        <a href="<?= base_url('appointments/cancel/'.$appt['id']); ?>" 
-           class="btn btn-danger btn-sm">
-           <i class="bi bi-x-circle"></i> Cancel
+        <a href="<?= base_url('appointments/cancel/'.$appt['id']); ?>" class="btn btn-danger btn-sm">
+            <i class="bi bi-x-circle"></i> Cancel
         </a>
-         <?php elseif ($appt['status'] === 'Completed'): ?>
-           <span class="btn btn-success btn-sm">
-           <i class="bi bi-check-circle"></i> Completed</span>
-         <?php else :?>
-           <span class="btn btn-danger btn-sm">
-           <i class="bi bi-check-circle"></i> Cancelled</span>
-    <?php endif; ?>
-    <a href="<?= base_url('doctors/dashboard2/'.$appt['patient_id']); ?>" 
+
+    <?php elseif ($appt['status'] === 'Completed'): ?>
+        <span class="btn btn-success btn-sm">
+            <i class="bi bi-check-circle"></i> Completed
+        </span>
+
+        <a href="<?= base_url('doctors/dashboard2/'.$appt['patient_id']); ?>" 
            class="btn btn-success btn-sm">
-           👪 Patient_info
-         </a>
-         <?php if ($appt['status'] === 'Completed' && empty($appt['prescription_id'])): ?>
-                        <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" 
-                           class="btn btn-primary btn-sm">
-                           💊 Add Prescription
-                        </a>
-                        <?php endif; ?>
-                         <?php if ($appt['status'] === 'Completed' && ($appt['prescription_id'])): ?>
-                        <a href="<?= base_url('doctors/prescriptions/'.$appt['prescription_id']); ?>" 
-   class="btn btn-success btn-sm">
-   💊 View Prescription
-</a>
+           👪 Patient Info
+        </a>
+
+        <?php if (empty($appt['prescription_id']) && empty($appt['payment_id'])): ?>
+            <!-- ✅ No prescription or billing yet -->
+            <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" class="btn btn-primary btn-sm">
+                💊 Add Prescription
+            </a>
+            <a href="<?= base_url('billing/'.$appt['id']); ?>" class="btn btn-success btn-sm">
+                💰 Add Billing
+            </a>
+
+        <?php elseif (!empty($appt['payment_id']) && empty($appt['prescription_id'])): ?>
+            <!-- ✅ Billing added first -->
+            <a href="<?= base_url('doctors/prescription/'.$appt['id']); ?>" class="btn btn-primary btn-sm">
+                💊 Add Prescription
+            </a>
+
+        <?php elseif (!empty($appt['prescription_id']) && empty($appt['payment_id'])): ?>
+            <!-- ✅ Prescription added first -->
+            <a href="<?= base_url('doctors/prescriptions/'.$appt['prescription_id']); ?>" class="btn btn-success btn-sm">
+                💊 View Prescription
+            </a>
+            <a href="<?= base_url('billing/'.$appt['id']); ?>" class="btn btn-success btn-sm">
+                💰 Add Billing
+            </a>
+
+        <?php elseif (!empty($appt['prescription_id']) && !empty($appt['payment_id'])): ?>
+            <!-- ✅ Both added -->
+            <a href="<?= base_url('doctors/prescriptions/'.$appt['prescription_id']); ?>" class="btn btn-success btn-sm">
+                💊 View Prescription
+            </a>
         <?php endif; ?>
+
+    <?php else: ?>
+        <span class="btn btn-danger btn-sm">
+            <i class="bi bi-x-circle"></i> Cancelled
+        </span>
+    <?php endif; ?>
 </td>
+
 
         </tr>
       <?php endforeach; ?>

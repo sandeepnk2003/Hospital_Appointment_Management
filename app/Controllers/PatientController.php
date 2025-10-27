@@ -21,9 +21,11 @@ public function index()
 
         // fetch all patients
         $data['patients'] = $patientModel
+        // ->distinct()    
         ->join('appointments','appointments.patient_id=patients.id')
         // ->join('hospitals','hospitals.id=patients.hospital_id')
         ->where('hospital_id', session('hospital_id'))
+        ->groupBy('patients.id')
         ->findAll();
     //  dd($data);
         // pass to view as associative array
@@ -138,15 +140,16 @@ public function appointmentHistory()
     // dd($appointmentId);
 
      $data['appt'] = $appointmentModel
-    ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id,hospitals.hospital_name as hospital_name')
+    ->select('appointments.*, users.username as doctor_name, doctors.specialization,prescription.id as prescription_id,hospitals.hospital_name as hospital_name,payments.payment_status as payment_status,payments.id as payments_id')
     ->join('hospitals','hospitals.id=appointments.hospital_id')
+    ->join('payments','appointments.id=payments.appointment_id')
     ->join('doctors', 'doctors.id = appointments.doctor_id')
     ->join('users', 'users.id = doctors.userid')
     ->join('prescription','prescription.appointment_id=appointments.id')
     ->where('appointments.patient_id', $patientId)
     ->orderBy('appointments.start_datetime', 'DESC')
     ->findAll();
-
+// dd( $data['appt'] );
 return view('patient/appointments_history', $data);
 }
   

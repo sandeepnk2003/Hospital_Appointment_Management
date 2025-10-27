@@ -49,12 +49,12 @@
                         <td><?= esc($patient['created_at']); ?></td>
                         <td><?= esc($patient['updated_at']); ?></td>
                         <td>
-                            <a href="<?= base_url('patients/edit/'.$patient['id']); ?>" class="btn btn-sm btn-primary">Edit</a>
+                            <!-- <a href="<?= base_url('patients/edit/'.$patient['id']); ?>" class="btn btn-sm btn-primary">Edit</a>
                             <a href="<?= base_url('patients/delete/'.$patient['id']); ?>" 
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Are you sure you want to delete this patient?');">
                                Delete
-                            </a>
+                            </a> -->
                              <a href="<?= base_url('doctors/dashboard2/'.$patient['id']); ?>" 
                              class="btn btn-success btn-sm">
                               👪 Patient_info

@@ -51,6 +51,7 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->get('prescription/download/(:num)', 'PrescriptionController::download/$1');
     $routes->get('doctorAvailability', 'DoctorAvailabilityController::doctorAvailability');
     $routes->post('getAvailabilityByHospital', 'DoctorAvailabilityController::getAvailabilityByHospital');
+    $routes->get('payments/slip/(:num)', 'BillingController::slip/$1');
 
 
 });
@@ -101,7 +102,7 @@ $routes->group('patients', ['filter' => 'auth'], function($routes) {
     $routes->get('appointments/update/(:num)','PatientController::UpdateAppointment/$1');
 });
 
-// ---------- APPOINTMENTS ----------
+// ---------------------------- APPOINTMENTS ----------------------------
 $routes->group('appointments', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'AppointmentController::index');
     $routes->get('create', 'AppointmentController::create');
@@ -126,3 +127,14 @@ $routes->group('availability', ['filter' => 'auth'], function($routes) {
 });
 
 
+$routes->get('billing/(:num)','BillingController::addBilling/$1');
+$routes->group('payments',  ['filter' => 'auth'],function($routes) {
+    $routes->get('/','BillingController::paymentManagement');
+    $routes->post('save', 'BillingController::save');
+    $routes->get('success/(:num)', 'BillingController::success/$1');
+    // $routes->post('success/(:num)', 'BillingController::success/$1');
+    $routes->post('markCompleted/(:num)', 'BillingController::markCompleted/$1');
+});
+
+
+$routes->get('payments/slip/(:num)', 'BillingController::slip/$1');

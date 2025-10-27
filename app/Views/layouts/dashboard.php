@@ -54,23 +54,23 @@
             <i class="bi bi-speedometer2"></i> Dashboard
           </a>
         </li>
-        <?php if (session()->get('role') === 'superadmin'): ?>
+          <?php if (session()->get('role') === 'superadmin'): ?>
           <li class="nav-item"><a href="<?= base_url('users/') ?>" class="nav-link"><i class="bi bi-people"></i> Manage Users</a></li>
-        <?php endif; ?>
+          <?php endif; ?>
 
-        <?php if (session()->get('role') === 'admin' || session()->get('role') === 'superadmin'): ?>
+          <?php if (session()->get('role') === 'admin' || session()->get('role') === 'superadmin'): ?>
           <li class="nav-item"><a href="<?= base_url('doctors') ?>" class="nav-link"><i class="bi bi-person-badge"></i> Manage Doctors</a></li>
           <li class="nav-item"><a href="<?= base_url('availability') ?>" class="nav-link"><i class="bi bi-person-badge"></i>Manage Doctor_Availability</a></li>
 
           <li class="nav-item"><a href="<?= base_url('patients') ?>" class="nav-link"><i class="bi bi-heart"></i> Manage Patients</a></li>
+            <li class="nav-item"><a href="<?= base_url('payments/') ?>" class="nav-link"><i class="bi bi-credit-card"></i> Manage Payments</a></li>
+            <?php endif; ?>
 
-        <?php endif; ?>
-
-        <?php if (session()->get('role') === 'doctor'): ?>
+          <?php if (session()->get('role') === 'doctor'): ?>
           <li class="nav-item"><a href="<?= base_url('patients') ?>" class="nav-link"><i class="bi bi-heart"></i> My Patients</a></li>
-        <?php endif; ?>
+          <?php endif; ?>
 
-        <?php if (session()->get('role') !== 'patient'): ?>
+         <?php if (session()->get('role') !== 'patient'): ?>
           <li class="nav-item"><a href="<?= base_url('appointments') ?>" class="nav-link"><i class="bi bi-calendar-check"></i> Appointments</a></li>
         <?php endif; ?>
       </ul>

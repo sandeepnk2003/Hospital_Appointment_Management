@@ -8,7 +8,7 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // $hospitalModel = new \App\Models\HospitalModel();
+//         $hospitalModel = new \App\Models\HospitalModel();
 
 // $data2= [
 //     [
@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
 //         'updated_at'      => date('Y-m-d H:i:s'),
 //     ],
 // ];
-// $this->db->table('hospitals')->insert($data2);
+// $this->db->table('hospitals')->insertBatch($data2);
         $data = [
             'username'      => 'Sandeep',
             'hospital_id'   =>'2',

@@ -56,6 +56,8 @@
               <th>Status</th>
               <th>Action</th>
               <th>Prescription Download</th>
+              <th>Payment Status</th>
+              <th>Payment Slip</th>
             </tr>
           </thead>
           <tbody>
@@ -95,9 +97,22 @@
                   <?php endif; ?>
                 </td>
               <td>
-                <a href="<?= base_url('patient/prescription/download/' . $apptRow['prescription_id']) ?>" 
+              <center>  <a href="<?= base_url('patient/prescription/download/' . $apptRow['prescription_id']) ?>" 
                  class="btn btn-sm btn-success">
-               <i class="bi bi-download"></i> Download PDF
+               <i class="bi bi-download"></i>Download PDF
+                 </a></center>
+              </td>
+              <td class="text-center">
+                  <?php if ($apptRow['payment_status'] === 'completed'): ?>
+                    <span class="badge bg-success">Completed</span>
+                  <?php else : ?>
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  <?php endif; ?>
+                </td>
+              <td>
+                <a href="<?= base_url('patient/payments/slip/' . $apptRow['payments_id']) ?>" 
+                 class="btn btn-sm btn-success">
+               <i class="bi bi-download"></i> Download 
                  </a>
               </td>
               </tr>
