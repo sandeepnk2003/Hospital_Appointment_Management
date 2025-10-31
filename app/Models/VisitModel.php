@@ -16,10 +16,8 @@ class VisitModel extends Model
         'patient_id',
         'doctor_id',
         'date',
-        'reason',
         'weight',
         'blood_pressure',
-        'doctor_comments',
         'created_at',
         'updated_at'    ];
 

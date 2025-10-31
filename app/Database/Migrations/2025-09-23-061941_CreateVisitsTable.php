@@ -35,10 +35,6 @@ class CreateVisitsTable extends Migration
                 'type' => 'DATE',
                 'null' => false,
             ],
-            'reason' => [
-                'type' => 'TEXT',
-                'null' => true,
-            ],
             'weight' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '10',
@@ -48,10 +44,6 @@ class CreateVisitsTable extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => '10',
                 'null'       => true,
-            ],
-            'doctor_comments' => [
-                'type' => 'TEXT',
-                'null' => true,
             ],
             'created_at' => [
                 'type' => 'DATETIME',

@@ -131,7 +131,8 @@ public function paymentManagement(){
     ->join('doctors','doctors.id=payments.doctor_id')
     ->join('users','users.id=doctors.userId')
     ->orderBy("FIELD(payments.payment_status, 'pending', 'completed')")  // <--- single string
-    ->orderBy('payments.created_at', 'DESC')      
+    ->orderBy('payments.created_at', 'DESC')   
+    ->where('payments.hospital_id',session('hospital_id'))   
     ->findAll();
     // dd($data);
     return view('billing/payment_dashboard',$data);

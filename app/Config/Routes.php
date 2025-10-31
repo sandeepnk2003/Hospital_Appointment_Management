@@ -50,6 +50,8 @@ $routes->group('patient', ['filter' => 'patientAuth'], function($routes) {
     $routes->post('appointments/reschedule/(:num)', 'PatientController::saveReschedule/$1');
     $routes->get('prescription/download/(:num)', 'PrescriptionController::download/$1');
     $routes->get('doctorAvailability', 'DoctorAvailabilityController::doctorAvailability');
+    $routes->get('doctorinfo', 'DoctorAvailabilityController::doctorInfo');
+    $routes->get('doctor_availability/(:num)', 'DoctorAvailabilityController::doctorsAvailability/$1');
     $routes->post('getAvailabilityByHospital', 'DoctorAvailabilityController::getAvailabilityByHospital');
     $routes->get('payments/slip/(:num)', 'BillingController::slip/$1');
 
@@ -118,17 +120,20 @@ $routes->group('appointments', ['filter' => 'auth'], function($routes) {
 
 $routes->group('availability', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'DoctorAvailabilityController::index');
+    $routes->get('edit/(:num)', 'DoctorAvailabilityController::editDoctor/$1');
+    $routes->post('edit/(:num)', 'DoctorAvailabilityController::editDoctor/$1');
+
     $routes->post('store', 'DoctorAvailabilityController::store');
     $routes->post('toggle/(:num)', 'DoctorAvailabilityController::toggle/$1');
-
+    $routes->get('delete/(:num)','DoctorAvailabilityController::deleteAvail/$1');
 
 
 
 });
 
 
-$routes->get('billing/(:num)','BillingController::addBilling/$1');
-$routes->group('payments',  ['filter' => 'auth'],function($routes) {
+    $routes->get('billing/(:num)','BillingController::addBilling/$1');
+    $routes->group('payments',  ['filter' => 'auth'],function($routes) {
     $routes->get('/','BillingController::paymentManagement');
     $routes->post('save', 'BillingController::save');
     $routes->get('success/(:num)', 'BillingController::success/$1');
@@ -138,3 +143,4 @@ $routes->group('payments',  ['filter' => 'auth'],function($routes) {
 
 
 $routes->get('payments/slip/(:num)', 'BillingController::slip/$1');
+

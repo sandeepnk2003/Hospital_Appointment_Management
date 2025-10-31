@@ -32,7 +32,8 @@ class AppointmentController extends ResourceController
         ->join('patients', 'patients.id = appointments.patient_id')
         ->join('doctors', 'doctors.id = appointments.doctor_id')
         ->join('users', 'users.id = doctors.userid')
-        ->where('doctors.hospital_id', session('hospital_id'));
+         ->join('userhospital_junction','userhospital_junction.userid=users.id')
+        ->where('userhospital_junction.hospital_id',session('hospital_id') );
         // ->findAll();
 
     // ✅ Apply filter: today/week/month
@@ -146,9 +147,9 @@ if ($requestedStart < $availability['start_time'] || $requestedEnd > $availabili
     }
 
     $data['doctors'] = $doctorModel->select('doctors.id, users.username as name')
-                       ->join('hospitals','hospitals.id=doctors.hospital_id')
                        ->join('users', 'users.id = doctors.userid')
-                       ->where('doctors.hospital_id',session('hospital_id'))
+                        ->join('userhospital_junction','userhospital_junction.userid=users.id')
+                        ->where('userhospital_junction.hospital_id',session('hospital_id') )
                        ->findAll();
     $data['patients'] = $patientModel
     // ->where('hospital_id',session('hospital_id'))
@@ -316,7 +317,9 @@ public function DoctorPatientAppointment($doctorId){
         ->join('patients', 'patients.id = appointments.patient_id')
         ->join('doctors', 'doctors.id = appointments.doctor_id')
         ->join('users', 'users.id = doctors.userid')
-        ->where('doctors.hospital_id', session('hospital_id'))
+         ->join('userhospital_junction','userhospital_junction.userid=users.id')
+        ->where('userhospital_junction.hospital_id',session('hospital_id') )
+        // ->where('doctors.hospital_id', session('hospital_id'))
         ->where('appointments.doctor_id',$doctorId);
         // ->where('status','completed');
         // ->findAll();

@@ -12,10 +12,7 @@ use App\Models\VisitModel;
 use App\Models\PrescriptionModel;
 use App\Models\PrescriptionMedicineModel;
 use App\Models\HospitalModel;
-
-
-
-
+use App\Models\VisitReasonModel;
 
 class DoctorController extends ResourceController
 {
@@ -41,7 +38,7 @@ class DoctorController extends ResourceController
     // If the request is POST, insert doctor info
     if ($this->request->getMethod() === 'POST') {
         $data = [
-            'hospital_id'    =>session('hospital_id'),
+            // 'hospital_id'    =>session('hospital_id'),
             'userid'          => $id,
             'specialization'  => $this->request->getPost('specialization'),
             'qualification'   => $this->request->getPost('qualification'),
@@ -68,9 +65,9 @@ public function listdoctor(){
         // Join doctors with users to fetch doctor + user info
         $doctors = $doctorModel
             ->select('doctors.id as doctor_id, doctors.*, users.username, users.email')
-            ->join('hospitals','hospitals.id=doctors.hospital_id')
             ->join('users', 'users.id = doctors.userid')
-            ->where('doctors.hospital_id',$hospital_id )
+            ->join('userhospital_junction','userhospital_junction.userid=users.id')
+            ->where('userhospital_junction.hospital_id',$hospital_id )
             ->findAll();
 // dd($doctors);
         return view('doctor/index', ['doctors' => $doctors]);
@@ -146,32 +143,49 @@ return view('doctor/doctor-patient', $data);
     }
        public function saveVisit()
     {
-        $visitModel = new VisitModel();
-        $appointmentModel = new AppointmentModel();
+    $visitModel = new VisitModel();
+    $reasonModel = new VisitReasonModel();
+    $appointmentModel=new AppointmentModel();
+    $appointmentId = $this->request->getPost('appointment_id');
+    $hospitalId = $this->request->getPost('hospital_id');
+    $patientId = $this->request->getPost('patient_id');
+    $doctorId = $this->request->getPost('doctor_id');
+    $weight = $this->request->getPost('weight');
+    $bloodPressure = $this->request->getPost('blood_pressure');
+    $reasons = $this->request->getPost('reason');        // array
+    $diagnoses = $this->request->getPost('diagnosis');   // array
 
-        $appointmentId = $this->request->getPost('appointment_id');
-        $patientId     = $this->request->getPost('patient_id');
-        $DoctorId     = $this->request->getPost('doctor_id');
+    // Step 1: Save visit info
+    $visitData = [
+        'hospital_id'    => $hospitalId,
+        'appointment_id' => $appointmentId,
+        'patient_id'     => $patientId,
+        'doctor_id'      => $doctorId,
+        'date'           => date('Y-m-d'),
+        'weight'         => $weight,
+        'blood_pressure' => $bloodPressure,
+        'created_at'     => date('Y-m-d H:i:s'),
+    ];
 
-    $existingVisit = $visitModel->where('appointment_id', $appointmentId)->first();
-    if ($existingVisit) {
-        return redirect()->back()->with('error', 'Visit already completed for this appointment.');
+    if (!$visitModel->insert($visitData)) {
+        return redirect()->back()->with('error', 'Failed to save visit.');
     }
-        $data = [
-            'hospital_id'=>session('hospital_id'),
-            'appointment_id'  => $appointmentId,
-            'patient_id'      => $patientId,
-            'doctor_id'       => $DoctorId,
-            'date'            => date('Y-m-d'),
-            'reason'          => $this->request->getPost('reason'),
-            'weight'          => $this->request->getPost('weight'),
-            'blood_pressure'  => $this->request->getPost('blood_pressure'),
-            'doctor_comments' => $this->request->getPost('doctor_comments'),
-        ];
 
-        $visitModel->insert($data);
+    $visitId = $visitModel->getInsertID();
 
-        // Mark appointment as completed
+    // Step 2: Save multiple reasons
+    foreach ($reasons as $index => $reasonText) {
+        $diagnosisText = $diagnoses[$index] ?? null;
+        if (!empty(trim($reasonText)) || !empty(trim($diagnosisText))) {
+            $reasonModel->insert([
+                'visit_id'   => $visitId,
+                'reason'     => $reasonText,
+                'diagnosis'  => $diagnosisText,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
         $appointmentModel->update($appointmentId, [
             'status' => 'completed'
         ]);
@@ -181,44 +195,57 @@ return view('doctor/doctor-patient', $data);
     public function index2($patientId)
     {
         $patientModel = new PatientModel();
-        $visitModel   = new VisitModel();
+        $visitModel = new VisitModel();
+        $visitReasonModel = new VisitReasonModel();
 
-        // Fetch patient details
+        // ✅ Fetch patient
         $patient = $patientModel->find($patientId);
         if (!$patient) {
             return redirect()->back()->with('error', 'Patient not found');
         }
 
-        // Fetch visits
-        $visits = $visitModel->where('patient_id', $patientId)
-                            // ->where('hodpital_id',session('hospital_id'))
-                             ->orderBy('date', 'ASC')
-                             ->findAll();
+        // ✅ Fetch all visits
+        $visits = $visitModel
+          ->select('visits.*,hospitals.hospital_name,users.username as doctor_name')
+             ->join('appointments','appointments.id=visits.appointment_id')
+             ->join('doctors','doctors.id=appointments.doctor_id')
+             ->join('users','users.id=doctors.userid')
+             ->join('hospitals','hospitals.id=visits.hospital_id')
+            ->where('visits.patient_id', $patientId)
+            ->orderBy('date', 'ASC')
+            ->findAll();
+// dd($visits);
+        // ✅ Attach reasons and diagnoses to each visit
+        foreach ($visits as &$visit) {
+            $visit['reasons'] = $visitReasonModel
+                ->where('visit_id', $visit['id'])
+                ->findAll();
+        }
+        unset($visit);
 
-        // Prepare chart data
+        // ✅ Prepare chart data
         $visitDates = [];
         $weightData = [];
         $systolicData = [];
         $diastolicData = [];
 
-        foreach($visits as $v){
+        foreach ($visits as $v) {
             $visitDates[] = date('d M', strtotime($v['date']));
-            $weightData[] = floatval(str_replace('kg','',$v['weight']));
+            $weightData[] = floatval(str_replace('kg', '', $v['weight']));
             $bpParts = explode('/', $v['blood_pressure']);
-            $systolicData[]  = intval($bpParts[0] ?? 0);
+            $systolicData[] = intval($bpParts[0] ?? 0);
             $diastolicData[] = intval($bpParts[1] ?? 0);
         }
 
+        // ✅ Pass to view
         return view('patient/index2', [
             'patient'       => $patient,
             'visits'        => $visits,
             'visitDates'    => $visitDates,
             'weightData'    => $weightData,
             'systolicData'  => $systolicData,
-            'diastolicData' => $diastolicData
+            'diastolicData' => $diastolicData,
         ]);
     }
-
-
 }
 

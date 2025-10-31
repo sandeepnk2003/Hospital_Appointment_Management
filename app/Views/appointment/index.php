@@ -14,9 +14,9 @@
         </div>
 </div>
 <?php $qs = $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''; ?>
-<a href="<?= base_url('appointments/export') . $qs ?>" class="btn btn-success">
+<!-- <a href="<?= base_url('appointments/export') . $qs ?>" class="btn btn-success">
   <i class="bi bi-file-earmark-excel"></i> Export to Excel
-</a>
+</a> -->
 
     <?php if(session()->getFlashdata('success')): ?>
         <div class="alert alert-success"><?= session()->getFlashdata('success'); ?></div>

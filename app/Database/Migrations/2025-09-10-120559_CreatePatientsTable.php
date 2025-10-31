@@ -50,7 +50,7 @@ class CreatePatientsTable extends Migration
              'deleted_at' => ['type' => 'DATETIME', 'null' => true],
         ]);
         $this->forge->addKey('id', true);
-        // $this->forge->addUniqueKey('email');
+        // $this->forge->addUniqueKey('['email',');
         // $this->forge->addForeignKey('hospital_id', 'hospitals', 'id', 'CASCADE', 'CASCADE');
         $this->forge->createTable('patients');
     }

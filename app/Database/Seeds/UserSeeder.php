@@ -27,29 +27,40 @@ class UserSeeder extends Seeder
 //     ],
 // ];
 // $this->db->table('hospitals')->insertBatch($data2);
-        $data = [
-            'username'      => 'Sandeep',
-            'hospital_id'   =>'2',
-            'email'         => 'nksandeep44@gmail.com',
-            'password' => password_hash('admin@123', PASSWORD_DEFAULT), // 🔒 default password
-            'role'          => 'superadmin',
-            'phoneno'       =>'8050750015',
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
-        ];   
-        $this->db->table('users')->insert($data);
-                $data2 = [
-            'username'      => 'Sandeep',
-            'hospital_id'   =>'1',
-            'email'         => 'sandeepnk2004@gmail.com',
-            'password' => password_hash('admin@123', PASSWORD_DEFAULT), // 🔒 default password
-            'role'          => 'superadmin',
-            'phoneno'       =>'8050750015',
-            'created_at'    => date('Y-m-d H:i:s'),
-            'updated_at'    => date('Y-m-d H:i:s'),
-        ];   
-        $this->db->table('users')->insert($data2);
+        // $data = [
+        //     'username'      => 'Sandeep',
+        //     // 'hospital_id'   =>'2',
+        //     'email'         => 'nksandeep44@gmail.com',
+        //     'password' => password_hash('admin@123', PASSWORD_DEFAULT), // 🔒 default password
+        //     'role'          => 'superadmin',
+        //     'phoneno'       =>'8050750015',
+        //     'created_at'    => date('Y-m-d H:i:s'),
+        //     'updated_at'    => date('Y-m-d H:i:s'),
+        // ];   
+        // $this->db->table('users')->insert($data);
+        //         $data2 = [
+        //     'username'      => 'Sandeep',
+        //     // 'hospital_id'   =>'1',
+        //     'email'         => 'sandeepnk2004@gmail.com',
+        //     'password' => password_hash('admin@123', PASSWORD_DEFAULT), // 🔒 default password
+        //     'role'          => 'superadmin',
+        //     'phoneno'       =>'8050750015',
+        //     'created_at'    => date('Y-m-d H:i:s'),
+        //     'updated_at'    => date('Y-m-d H:i:s'),
+        // ];   
+        // $this->db->table('users')->insert($data2);
              
-
+$data3=[
+    'hospital_id'=>'1',
+    'userid'=>'1',
+    'created_at'    => date('Y-m-d H:i:s'),
+];
+$this->db->table('UserHospital_Junction')->insert($data3);
+$data4=[
+    'hospital_id'=>'2',
+    'userid'=>'2',
+    'created_at'    => date('Y-m-d H:i:s'),
+];
+$this->db->table('UserHospital_Junction')->insert($data4);
     }
 }

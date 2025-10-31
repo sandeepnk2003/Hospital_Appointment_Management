@@ -9,6 +9,7 @@ use App\Models\PatientModel;
 use App\Models\OtpModel;
 use App\Models\DoctorModel;
 use App\Models\HospitalModel;
+use App\Models\UserHospiJunctionModel;
 
 
 
@@ -23,37 +24,47 @@ class AuthController extends ResourceController
         if ($this->request->getMethod() === 'POST') {
             $userModel = new UserModel();
             $hospitalModel=new HospitalModel();
-            $session   = session();
-            $hospital_id=$this->request->getVar('hospital_id');
-            $hospital=$hospitalModel->
-            select('hospital_name') 
-             ->asObject()
+            $userHospitalModel=new UserHospiJunctionModel();
+            $session = session();
+            $hospital_id= $this->request->getVar('hospital_id');
+            //  dd($this->request->getVar('hospital_id'));
+            $hospital=$hospitalModel
+            ->select('hospital_name') 
+            ->asObject()
             ->where('id',$hospital_id)
-             ->first();
-             $hospital_name=$hospital->hospital_name;
+            ->first();
+            $hospital_name=$hospital->hospital_name;
             // dd($hospital_name);
             $email    = $this->request->getVar('email');
             $password = $this->request->getVar('password');
             // echo "$email";
             // echo $password;
+            
+        //   dd($email);
+            $user = $userModel
+                    ->select('users.*, userhospital_junction.*')
+                    ->join('userhospital_junction', 'userhospital_junction.userid = users.id')
+                    ->where('userhospital_junction.hospital_id', $hospital_id)
+                    ->where('users.email', $email)
+                    ->first();
+            
+// dd($user);
 
-            $user = $userModel->where('email', $email)
-            ->where('hospital_id',$hospital_id)
-            ->first();
-        //   $hopital_id=$
+
+            //   $hopital_id=$
             // print_r($user);
             // $data['hospitals']=$hospitalModel
             // ->findAll();
 
-            if ($user && password_verify($password, $user['password'])) {
-                $session->set([
-                    'hospital_id'=>$hospital_id,
-                    'hospital_name'=>$hospital_name,
-                    'user_id'    => $user['id'],
-                    'username'   => $user['username'],
-                    'role'       => $user['role'],
-                    'isLoggedIn' => true
-                ]); 
+        if ($user && password_verify($password, $user['password'])) {
+                    $session->set([
+                        'hospital_id'=>$hospital_id,
+                        'hospital_name'=>$hospital_name,
+                        'user_id'    => $user['id'],
+                        'username'   => $user['username'],
+                        'role'       => $user['role'],
+                        'isLoggedIn' => true
+                    ]); 
                 // dd($session->get());
                 if(session()->get('role')==='doctor'){
                       return redirect()->to('/doctor_dashboard');   
@@ -82,7 +93,7 @@ class AuthController extends ResourceController
     $session->destroy();//it will destroy eveything in the session
     // $session->delete('hospital_id,hosital_name');
     // dd($session->get());
-    //     $newSession = session();
+    //     $newSessi            on = session();
     // $newSession->set($hospitalData);
     //    dd(session()->get());
         return redirect()->to('auth/login');

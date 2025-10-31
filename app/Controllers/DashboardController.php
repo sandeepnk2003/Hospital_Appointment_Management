@@ -30,7 +30,13 @@ class DashboardController extends ResourceController
     ->groupBy('patients.id')
     ->countAllResults();
     // dd($data['patients']);
-    $data['doctorCount']  = $doctorModel ->join('hospitals','hospitals.id=doctors.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
+
+    $data['doctorCount']  = $doctorModel 
+    ->join('users','users.id=doctors.userid')
+     ->join('userhospital_junction', 'userhospital_junction.userid = users.id')
+    ->where('userhospital_junction.hospital_id', $hospital_id)->countAllResults();
+
+
     $data['totalAppointments'] = $appointmentModel ->join('hospitals','hospitals.id=appointments.hospital_id')->where('hospital_id', $hospital_id)->countAllResults();
 
     // Today’s appointments
@@ -73,13 +79,15 @@ class DashboardController extends ResourceController
     $doctorModel      = new \App\Models\DoctorModel();
     $appointmentModel = new \App\Models\AppointmentModel();
 $doctor = $doctorModel
+->select('doctors.id')
 // ->join('hospitals','hospitals.id=doctors.hospital_id')
-->
-where('userid', session()->get('user_id'))
-->where('hospital_id', session('hospital_id'))
+ ->join('userhospital_junction','userhospital_junction.userid=doctors.userid')
+ ->where('userhospital_junction.hospital_id',session('hospital_id') )
+ ->where('doctors.userid', session()->get('user_id'))
 ->first();
-// dd($doctor);
+    // dd($doctor);
 $doctorId = $doctor['id'];
+// dd($doctorId);
 $data['id']=$doctorId;
 $hospital_id=session('hospital_id');
 // dd($hospital_id);
@@ -87,13 +95,13 @@ $hospital_id=session('hospital_id');
 //  dd(session()->get());
     // Today
     $today = date('Y-m-d');
+    // dd($today);
     $data['todayAppointmentsCount'] = $appointmentModel
-    // ->join('hospitals','hospitals.id=appointments.hospital_id')
-    // ->where('hospital_id', session('hospital_id'))
+        ->where('hospital_id',$hospital_id)
         ->where('DATE(start_datetime)', $today)
         ->where('doctor_id',$doctorId)
         ->countAllResults();
-    
+    // dd( $data['todayAppointmentsCount'] );
     //  print_r($data);
     // This week (BETWEEN)
     $weekStart = date('Y-m-d', strtotime('monday this week'));

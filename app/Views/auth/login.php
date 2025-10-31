@@ -79,7 +79,7 @@ document.getElementById('hospitalSearch').addEventListener('keyup', function () 
 
                 <p class="mt-3 mb-1 text-center">
                     <a href="#">Forgot password?</a>
-                    <a href="/">Select Hospitals</a>
+                    <!-- <a href="/">Select Hospitals</a> -->
                 </p>
             </div>
         </div>

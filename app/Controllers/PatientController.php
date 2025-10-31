@@ -175,9 +175,10 @@ return view('patient/appointments_history', $data);
         $doctors = $doctorModel
             ->select('users.username as name, doctors.*')
             ->join('users', 'users.id = doctors.userid')
-            ->where('doctors.hospital_id', $hospital_id)
+            ->join('userhospital_junction','userhospital_junction.userid=users.id')
+            ->where('userhospital_junction.hospital_id', $hospital_id)
             ->findAll();
-
+        
         return $this->response->setJSON($doctors);
     }
 
