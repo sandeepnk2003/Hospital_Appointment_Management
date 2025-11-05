@@ -25,20 +25,21 @@ class DoctorAvailabilityController extends ResourceController
         $data['doctors'] = $doctorModel
             ->select('doctors.id, users.username as doctors_name')
             ->join('users', 'users.id = doctors.userid')
-             ->join('userhospital_junction','userhospital_junction.userid=users.id')
+            ->join('userhospital_junction','userhospital_junction.userid=users.id')
             ->where('userhospital_junction.hospital_id',session('hospital_id') )
             ->findAll();
-
-        // Fetch all availability records
-        $availabilitiesRaw = $availabilityModel
-            ->select('doctor_availability.*, users.username as doctors_name')
-            ->join('doctors', 'doctors.id = doctor_availability.doctor_id')
-            ->join('users', 'users.id = doctors.userid')
-             ->join('userhospital_junction','userhospital_junction.userid=users.id')
-            ->where('userhospital_junction.hospital_id',session('hospital_id') )
-            ->orderBy('day_of_week', 'ASC')
-            ->findAll();
-
+$hospitalId = session('hospital_id');
+// dd($hospitalId);
+$availabilitiesRaw = $availabilityModel
+ ->distinct()
+    ->select('doctor_availability.*, users.username AS doctor_name')
+    ->join('doctors', 'doctors.id = doctor_availability.doctor_id')
+    ->join('users', 'users.id = doctors.userid')
+    ->join('userhospital_junction', 'userhospital_junction.userid = users.id')
+    ->where('doctor_availability.hospital_id', $hospitalId)
+    ->orderBy('day_of_week', 'ASC')
+    ->findAll();
+//   dd($availabilitiesRaw);
 
         // Group availabilities by day
         $grouped = [];

@@ -33,6 +33,22 @@
             <a href="<?= base_url('patient/dashboard'); ?>" class="btn btn-secondary">Back</a>
         </div>
 
+        <form method="get" action="<?= base_url('patient/doctoravailability'); ?>" class="mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="doctor_name" value="<?= esc($doctor_name ?? '') ?>" 
+                   class="form-control" placeholder="Search by Doctor Name">
+        </div>
+        <div class="col-md-4">
+            <input type="text" name="specialization" value="<?= esc($specialization ?? '') ?>" 
+                   class="form-control" placeholder="Search by Specialization">
+        </div>
+        <div class="col-md-4 d-flex">
+            <button type="submit" class="btn btn-success me-2">Search</button>
+            <a href="<?= base_url('patient/doctoravailability'); ?>" class="btn btn-secondary">Reset</a>
+        </div>
+    </div>
+</form>
     <div class="card shadow-sm">
         <div class="card-body">
             <?php if (session()->getFlashdata('success')): ?>

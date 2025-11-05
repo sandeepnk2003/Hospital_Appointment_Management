@@ -22,35 +22,31 @@ class UserController extends ResourceController
     }
 
     // Show all users
-    public function index()
-    {
-      
-        $userModel   = new UserModel();
-        $doctorModel = new DoctorModel();
+public function index()
+{   
+    $userModel   = new UserModel();
+    $doctorModel = new DoctorModel();
 
-        // Fetch all users
-        $users = $userModel
-    ->join('userhospital_junction', 'userhospital_junction.userid = users.id')
-    ->where('userhospital_junction.hospital_id', session('hospital_id'))
-    ->findAll();
+    // ✅ Fetch all users in the current hospital
+    $users = $userModel
+        ->select('users.*')
+        ->join('userhospital_junction', 'userhospital_junction.userid = users.id')
+        ->where('userhospital_junction.hospital_id', session('hospital_id'))
+        ->findAll();
 
-// ✅ Fetch all doctor user IDs globally (not just this hospital)
-$doctorRecords = $doctorModel->select('userid')->findAll();
-$doctorUserIds = array_column($doctorRecords, 'userid');
+    // ✅ Get all doctor user IDs that already exist in DoctorModel
+    $doctorRecords = $doctorModel->select('userid')->findAll();
+    $doctorUserIds = array_column($doctorRecords, 'userid');
 
-// ✅ Filter users who are not doctors yet
-$filteredUsers = array_filter($users, function ($user) use ($doctorUserIds) {
-    return !in_array($user['id'], $doctorUserIds);
-});
-
-// ✅ Pass both: all users and list of doctorUserIds
-return view('users/index', [
-    'users'         => $users, // show all users of hospital
-    'doctorUserIds' => $doctorUserIds // to check in view if doctor info exists
-]);
+    // ✅ Pass both to the view
+    return view('users/index', [
+        'users'         => $users,
+        'doctorUserIds' => $doctorUserIds
+    ]);
+}
 
         
-    }
+    
 
 
     

@@ -30,7 +30,8 @@
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
         <?php endif; ?>
-
+ 
+        
         <!-- Accordion by Day -->
         <div class="accordion" id="dayAccordion">
             <?php if (!empty($days)): ?>

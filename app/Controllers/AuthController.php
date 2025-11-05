@@ -48,7 +48,7 @@ class AuthController extends ResourceController
                     ->where('users.email', $email)
                     ->first();
             
-// dd($user);
+        // dd($user);
 
 
             //   $hopital_id=$

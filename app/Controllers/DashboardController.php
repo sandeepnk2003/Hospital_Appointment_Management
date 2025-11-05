@@ -78,6 +78,7 @@ class DashboardController extends ResourceController
   $patientModel     = new \App\Models\PatientModel();
     $doctorModel      = new \App\Models\DoctorModel();
     $appointmentModel = new \App\Models\AppointmentModel();
+//   dd(session()->get('user_id') );
 $doctor = $doctorModel
 ->select('doctors.id')
 // ->join('hospitals','hospitals.id=doctors.hospital_id')
@@ -86,6 +87,7 @@ $doctor = $doctorModel
  ->where('doctors.userid', session()->get('user_id'))
 ->first();
     // dd($doctor);
+    // dd($doctors);
 $doctorId = $doctor['id'];
 // dd($doctorId);
 $data['id']=$doctorId;

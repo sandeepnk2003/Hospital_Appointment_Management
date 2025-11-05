@@ -42,7 +42,7 @@
                                 <tbody>
                                     <?php foreach ($availabilities[$day] as $a): ?>
                                         <tr>
-                                            <td><?= esc($a['doctors_name']) ?></td>
+                                            <td><?= esc($a['doctor_name']) ?></td>
                                             <td><?= esc($a['shift_name']) ?></td>
                                             <td><?= esc($a['start_time']) ?></td>
                                             <td><?= esc($a['end_time']) ?></td>
